@@ -3,11 +3,13 @@
 package me.keraktelor.utilities.routing
 
 import io.ktor.http.*
+import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.logging.*
 import me.keraktelor.utilities.routing.Response.Builder.serverError
+import me.keraktelor.utilities.validation.Validatable
 
 typealias Handler<TRequest, TResponse, TError> =
         suspend RoutingContext.(TRequest) -> Response<TResponse, TError>
@@ -31,13 +33,33 @@ inline fun <
 ) {
     get(path) {
         callHandler(handler) {
-            try {
+            val request = try {
                 call.parameters.toDataClass<TRequest>()
-            } catch (e: MissingParameterException) {
-                call.response.status(HttpStatusCode.BadRequest)
-                call.respond(mapOf("message" to e.message.orEmpty()))
-                throw NoResponseNeededException()
+            } catch (e: Exception) {
+                if (e is MissingParametersException
+                    || e is MalformedParametersException
+                ) {
+                    call.response.status(HttpStatusCode.BadRequest)
+                    call.respond(mapOf("message" to e.message.orEmpty()))
+                    throw NoResponseNeededException()
+                }
+
+                throw e
             }
+
+            if (request is Validatable) {
+                val validationResult = request.validate()
+
+                if (validationResult is ValidationResult.Invalid) {
+                    call.response.status(HttpStatusCode.BadRequest)
+                    call.respond(
+                        mapOf("validationFailures" to validationResult.reasons)
+                    )
+                    throw NoResponseNeededException()
+                }
+            }
+
+            request
         }
     }
 }

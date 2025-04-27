@@ -11,20 +11,25 @@ inline fun <reified T : Any> Parameters.toDataClass(): T {
 
     val missingParameters = mutableListOf<String>()
 
-    val paramMap = props.associate {
+    val paramMap = props.mapNotNull {
         if (this[it.name] == null) {
             missingParameters.add(it.name)
+            return@mapNotNull null
         }
-        it.name to this[it.name].orEmpty()
-    }
+        it.name to this[it.name]
+    }.toMap()
 
     if (missingParameters.isNotEmpty()) {
-        throw MissingParameterException(missingParameters)
+        throw MissingParametersException(missingParameters)
     }
 
-    return Json.decodeFromString(
-        Json.encodeToString(
-            paramMap
+    try {
+        return Json.decodeFromString(
+            Json.encodeToString(
+                paramMap
+            )
         )
-    )
+    } catch (e: Exception) {
+        throw MalformedParametersException(e)
+    }
 }
