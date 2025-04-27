@@ -21,7 +21,11 @@ inline fun <reified TResponse : Any, reified TError : Any> Routing.typedGet(
     crossinline handler: Handler<Blank, TResponse, TError>,
 ) = typedGet<Blank, TResponse, TError>(path, handler)
 
-inline fun <reified TRequest : Any, reified TResponse : Any, reified TError : Any> Routing.typedGet(
+inline fun <
+        reified TRequest : Any,
+        reified TResponse : Any,
+        reified TError : Any,
+        > Routing.typedGet(
     path: String,
     crossinline handler: Handler<TRequest, TResponse, TError>,
 ) {
@@ -38,7 +42,11 @@ inline fun <reified TRequest : Any, reified TResponse : Any, reified TError : An
     }
 }
 
-inline fun <reified TRequest : Any, reified TResponse : Any, reified TError : Any> Routing.typedPost(
+inline fun <
+        reified TRequest : Any,
+        reified TResponse : Any,
+        reified TError : Any,
+        > Routing.typedPost(
     path: String,
     crossinline handler: Handler<TRequest, TResponse, TError>,
 ) {
@@ -56,7 +64,11 @@ inline fun <reified TRequest : Any, reified TResponse : Any, reified TError : An
 }
 
 @PublishedApi
-internal suspend inline fun <reified TRequest : Any, reified TResponse : Any, reified TError : Any> RoutingContext.callHandler(
+internal suspend inline fun <
+        reified TRequest : Any,
+        reified TResponse : Any,
+        reified TError : Any,
+        > RoutingContext.callHandler(
     crossinline handler: Handler<TRequest, TResponse, TError>,
     crossinline getRequest: suspend RoutingContext.() -> TRequest,
 ) {
