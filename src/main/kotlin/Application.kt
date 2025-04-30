@@ -12,6 +12,5 @@ fun Application.module() {
     setupDatabase()
     setupSerialization()
     setupCompression()
-    setupValidation()
     setupRouting()
 }

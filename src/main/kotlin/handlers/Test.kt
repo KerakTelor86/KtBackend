@@ -1,22 +1,30 @@
 package me.keraktelor.handlers
 
+import io.ktor.http.*
 import io.ktor.server.plugins.requestvalidation.*
 import kotlinx.serialization.Serializable
-import me.keraktelor.utilities.routing.Handler
-import me.keraktelor.utilities.routing.Response.Builder.badRequest
-import me.keraktelor.utilities.routing.Response.Builder.ok
-import me.keraktelor.utilities.routing.Response.Builder.serverError
+import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
+import me.keraktelor.utilities.dsl.Handler.Builder.withExceptionHandler
+import me.keraktelor.utilities.dsl.Response
 import me.keraktelor.utilities.validation.Validatable
 
 object TestHandlers {
-    val handleTest: Handler<TestRequest, String, TestError> = { request ->
+    val handleTest = createHttpHandler { request: TestRequest ->
         when (request.answer) {
-            42 -> ok { "You found the answer!" }
-            69 -> serverError { Exception("Nice") }
-            else -> badRequest { TestError(42 - request.answer) }
+            42 -> TestResponse("You found the answer!")
+            69 -> throw Exception("Nice")
+            else -> throw TestError(42 - request.answer)
         }
+    }.withExceptionHandler { err: TestError ->
+        Response.Error(
+            statusCode = HttpStatusCode.BadRequest,
+            data = err
+        )
     }
 }
+
+@Serializable
+data class TestResponse(val message: String)
 
 @Serializable
 data class TestRequest(val answer: Int) : Validatable {
@@ -29,4 +37,4 @@ data class TestRequest(val answer: Int) : Validatable {
 }
 
 @Serializable
-data class TestError(val difference: Int)
+data class TestError(val difference: Int) : Exception()
