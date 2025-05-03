@@ -14,135 +14,197 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
 inline fun <
-        reified TIn : Any,
-        reified TOut : Any,
-        reified TErr : Exception,
-        > Routing.typedGet(
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedGet(
     path: String,
-    handler: Handler<TIn, TOut, TErr>,
-) = get(path) {
-    catchAndLogInternalServerErrors {
-        callHandlerWith(handler) {
-            try {
-                val kClass = TIn::class
-
-                val constructor = kClass.primaryConstructor
-                    ?: throw UnsupportedTInException(kClass.qualifiedName.orEmpty())
-
-                val missingParameters = mutableListOf<String>()
-                val parameters = constructor.parameters.associateWith {
-                    val key = it.name.orEmpty()
-                    val value = call.parameters[key].orEmpty()
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) {
+    get(path) {
+        catchAndLogInternalServerErrors {
+            withPathParams<TPath> { pathParams ->
+                callHandlerWith(handler) {
                     try {
-                        when (it.type) {
-                            typeOf<String>() -> value
-                            typeOf<Int>() -> value.toInt()
-                            typeOf<Long>() -> value.toLong()
-                            typeOf<Float>() -> value.toFloat()
-                            typeOf<Double>() -> value.toDouble()
-                            else -> throw UnsupportedTInException(
-                                kClass.qualifiedName.orEmpty()
-                            )
-                        }
-                    } catch (_: NumberFormatException) {
-                        if (!it.type.isMarkedNullable) {
-                            missingParameters.add(key)
-                        }
-                        null
+                        Request(
+                            pathParams = pathParams,
+                            data = call.queryParameters.toDataClass<TIn>(),
+                        )
+                    } catch (e: MissingParametersException) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            MessageAndListResponse(
+                                message = e.message,
+                                list = e.fieldNames,
+                            ),
+                        )
+                        return@catchAndLogInternalServerErrors
                     }
                 }
-
-                if (missingParameters.isNotEmpty()) {
-                    throw MissingQueryParametersException(missingParameters)
-                }
-
-                constructor.callBy(parameters)
-            } catch (e: MissingQueryParametersException) {
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    MessageAndListResponse(
-                        message = e.message,
-                        list = e.fieldNames
-                    ),
-                )
-                return@catchAndLogInternalServerErrors
             }
         }
     }
 }
 
 inline fun <
-        reified TIn : Any,
-        reified TOut : Any,
-        reified TErr : Exception,
-        > Routing.typedPost(
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedPost(
     path: String,
-    handler: Handler<TIn, TOut, TErr>,
-) = post(path) {
-    catchAndLogInternalServerErrors {
-        callHandlerWith(handler) {
-            try {
-                call.receive<TIn>()
-            } catch (e: ContentTransformationException) {
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    MessageResponse(e.message.orEmpty()),
-                )
-                return@catchAndLogInternalServerErrors
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) {
+    post(path) {
+        catchAndLogInternalServerErrors {
+            withPathParams<TPath> { pathParams ->
+                callHandlerWith(handler) {
+                    try {
+                        Request(
+                            pathParams = pathParams,
+                            data = call.receive<TIn>(),
+                        )
+                    } catch (e: ContentTransformationException) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            MessageResponse(e.message.orEmpty()),
+                        )
+                        return@catchAndLogInternalServerErrors
+                    }
+                }
             }
         }
     }
 }
 
 @PublishedApi
+internal inline fun <reified T : Any> Parameters.toDataClass(): T {
+    val kClass = T::class
+
+    val constructor =
+        kClass.primaryConstructor
+            ?: throw UnsupportedTInException(
+                kClass.qualifiedName.orEmpty(),
+            )
+
+    val missingParameters = mutableListOf<String>()
+    val parameters =
+        constructor.parameters.associateWith {
+            val key = it.name.orEmpty()
+            val value = this[key].orEmpty()
+            try {
+                when (it.type) {
+                    typeOf<String>() -> value
+                    typeOf<Int>() -> value.toInt()
+                    typeOf<Long>() -> value.toLong()
+                    typeOf<Float>() -> value.toFloat()
+                    typeOf<Double>() -> value.toDouble()
+                    else ->
+                        throw UnsupportedTInException(
+                            kClass.qualifiedName.orEmpty(),
+                        )
+                }
+            } catch (_: NumberFormatException) {
+                if (!it.type.isMarkedNullable) {
+                    missingParameters.add(key)
+                }
+                null
+            }
+        }
+
+    if (missingParameters.isNotEmpty()) {
+        throw MissingParametersException(missingParameters)
+    }
+
+    return constructor.callBy(parameters)
+}
+
+@PublishedApi
+internal suspend inline fun <reified TPath : Any> RoutingContext.withPathParams(
+    body: RoutingContext.(TPath) -> Unit,
+) {
+    val pathParams =
+        try {
+            call.pathParameters.toDataClass<TPath>()
+        } catch (e: MissingParametersException) {
+            return call.respond(
+                HttpStatusCode.BadRequest,
+                MessageAndListResponse(
+                    message = e.message,
+                    list = e.fieldNames,
+                ),
+            )
+        }
+
+    body(pathParams)
+}
+
+@PublishedApi
 internal suspend inline fun <
-        reified TIn : Any,
-        reified TOut : Any,
-        reified TErr : Exception,
-        > RoutingContext.callHandlerWith(
-    handler: Handler<TIn, TOut, TErr>,
-    body: RoutingContext.() -> TIn,
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> RoutingContext.callHandlerWith(
+    handler: Handler<TPath, TIn, TOut, TErr>,
+    body: RoutingContext.() -> Request<TPath, TIn>,
 ) {
     val request = body()
 
-    if (request is Validatable) {
-        val validationResult = request.validate()
+    if (request.pathParams is Validatable) {
+        val validationResult = request.pathParams.validate()
         if (validationResult is ValidationResult.Invalid) {
-            call.respond(
+            return call.respond(
                 HttpStatusCode.BadRequest,
                 MessageAndListResponse(
-                    message = "Validation failed",
+                    message = "Path parameter validation failed",
                     list = validationResult.reasons,
-                )
+                ),
+            )
+        }
+    }
+
+    if (request.data is Validatable) {
+        val validationResult = request.data.validate()
+        if (validationResult is ValidationResult.Invalid) {
+            return call.respond(
+                HttpStatusCode.BadRequest,
+                MessageAndListResponse(
+                    message = "Request data validation failed",
+                    list = validationResult.reasons,
+                ),
             )
         }
     }
 
     val response = handler.handle(request)
-    call.respond(
-        response.statusCode,
-        response.data,
-    )
+    call.respond(response.statusCode, response.data)
 }
 
-class UnsupportedTInException(private val className: String) : Exception() {
+class UnsupportedTInException(
+    private val className: String,
+) : Exception() {
     override val message
         get() =
             "GET receive not supported for '$className'" +
-                    "-- Hint: Use POST instead"
+                "-- Hint: Use POST instead"
 }
 
-class MissingQueryParametersException(
+class MissingParametersException(
     val fieldNames: List<String>,
 ) : Exception() {
-    override val message get() = "Missing query parameters"
+    override val message
+        get() = "Missing parameters"
 }
 
 private val exceptionLogger = KtorSimpleLogger("dsl.routing.uncaughtException")
 
 @PublishedApi
 @Serializable
-internal data class MessageResponse(val message: String)
+internal data class MessageResponse(
+    val message: String,
+)
 
 @PublishedApi
 @Serializable

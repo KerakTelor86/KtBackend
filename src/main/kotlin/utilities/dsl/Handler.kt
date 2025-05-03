@@ -5,50 +5,49 @@ package me.keraktelor.utilities.dsl
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
-interface Handler<TIn : Any, TOut : Any, TErr : Exception> {
+interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
     companion object Builder {
-        fun <TIn : Any, TOut : Any> createHttpHandler(
-            body: suspend (TIn) -> TOut,
-        ): Handler<TIn, TOut, Exception> {
-            return object : Handler<TIn, TOut, Exception> {
-                override suspend fun invoke(request: TIn): TOut {
-                    return body(request)
-                }
-            }
-        }
-
-        fun <
-                TIn : Any,
-                TOut : Any,
-                TErr : Exception,
-                > Handler<TIn, TOut, Exception>.withExceptionHandler(
-            body: suspend (TErr) -> Response<Any>,
-        ): Handler<TIn, TOut, TErr> {
-            return object : Handler<TIn, TOut, TErr> {
+        fun <TPath : Any, TIn : Any, TOut : Any> createHttpHandler(
+            body: suspend (pathParams: TPath, data: TIn) -> TOut,
+        ): Handler<TPath, TIn, TOut, Exception> =
+            object : Handler<TPath, TIn, TOut, Exception> {
                 override suspend fun invoke(
-                    request: TIn,
-                ): TOut {
-                    return this@withExceptionHandler(request)
-                }
+                    request: Request<TPath, TIn>,
+                ): TOut = body(request.pathParams, request.data)
+            }
+
+        fun <TPath : Any, TIn : Any, TOut : Any, TErr : Exception> Handler<
+            TPath,
+            TIn,
+            TOut,
+            Exception,
+        >.withExceptionHandler(
+            body: suspend (exception: TErr) -> Response<Any>,
+        ): Handler<TPath, TIn, TOut, TErr> =
+            object : Handler<TPath, TIn, TOut, TErr> {
+                override suspend fun invoke(
+                    request: Request<TPath, TIn>,
+                ): TOut = this@withExceptionHandler(request)
 
                 override suspend fun transformException(
                     exception: TErr,
-                ): Response<Any> {
-                    return body(exception)
-                }
+                ): Response<Any> = body(exception)
             }
-        }
     }
 
-    suspend operator fun invoke(request: TIn): TOut
+    suspend operator fun invoke(request: Request<TPath, TIn>): TOut
 
-    suspend fun transformException(exception: TErr): Response<Any> {
+    suspend fun transformException(exception: TErr): Response<Any> =
         throw exception
-    }
 }
 
 @Serializable
 class Blank
+
+data class Request<TPath, TIn>(
+    val pathParams: TPath,
+    val data: TIn,
+)
 
 sealed class Response<TData> {
     abstract val statusCode: HttpStatusCode
@@ -69,13 +68,14 @@ sealed class Response<TData> {
 
 @PublishedApi
 internal suspend inline fun <
-        TIn : Any,
-        TOut : Any,
-        reified TErr : Exception,
-        > Handler<TIn, TOut, TErr>.handle(
-    request: TIn,
-): Response<Any> {
-    return try {
+    TPath : Any,
+    TIn : Any,
+    TOut : Any,
+    reified TErr : Exception,
+> Handler<TPath, TIn, TOut, TErr>.handle(
+    request: Request<TPath, TIn>,
+): Response<Any> =
+    try {
         Response.Ok(this(request))
     } catch (e: Exception) {
         if (e is TErr) {
@@ -84,4 +84,3 @@ internal suspend inline fun <
             throw e
         }
     }
-}
