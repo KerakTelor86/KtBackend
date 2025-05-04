@@ -54,7 +54,22 @@ sealed class Response<TData> {
     companion object Builder {
         fun <T> ok(body: () -> T) = Ok(body())
 
-        fun <T> err(
+        fun <T> badRequest(body: () -> T) =
+            Error(HttpStatusCode.BadRequest, body())
+
+        fun <T> unauthorized(body: () -> T) =
+            Error(HttpStatusCode.Unauthorized, body())
+
+        fun <T> forbidden(body: () -> T) =
+            Error(HttpStatusCode.Forbidden, body())
+
+        fun <T> tooManyRequests(body: () -> T) =
+            Error(HttpStatusCode.TooManyRequests, body())
+
+        fun <T> internalServerError(body: () -> T) =
+            Error(HttpStatusCode.InternalServerError, body())
+
+        fun <T> errorWithStatus(
             statusCode: HttpStatusCode,
             body: () -> T,
         ) = Error(statusCode, body())
