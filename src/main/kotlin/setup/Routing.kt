@@ -2,12 +2,10 @@ package me.keraktelor.setup
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import me.keraktelor.handlers.HealthHandlers
-import me.keraktelor.handlers.TestHandlers
-import me.keraktelor.utilities.dsl.typedGet
+import me.keraktelor.handlers.auth.authHandler
 
-fun Application.setupRouting() =
+fun Application.setupRouting() {
     routing {
-        typedGet("/health", HealthHandlers.handleHealth)
-        typedGet("/test/{answer}", TestHandlers.handleTest)
+        authHandler()
     }
+}

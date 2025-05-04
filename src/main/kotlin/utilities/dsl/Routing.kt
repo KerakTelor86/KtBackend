@@ -13,6 +13,26 @@ import me.keraktelor.utilities.validation.Validatable
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
+@JvmName("typedGetNoRoute")
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedGet(
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) = typedGet("", handler)
+
+@JvmName("typedPostNoRoute")
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedPost(
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) = typedPost("", handler)
+
 inline fun <
     reified TPath : Any,
     reified TIn : Any,
@@ -82,36 +102,34 @@ inline fun <
 internal inline fun <reified T : Any> Parameters.toDataClass(): T {
     val kClass = T::class
 
-    val constructor =
-        kClass.primaryConstructor
-            ?: throw UnsupportedTInException(
-                kClass.qualifiedName.orEmpty(),
-            )
+    val constructor = kClass.primaryConstructor
+        ?: throw UnsupportedTInException(
+            kClass.qualifiedName.orEmpty(),
+        )
 
     val missingParameters = mutableListOf<String>()
-    val parameters =
-        constructor.parameters.associateWith {
-            val key = it.name.orEmpty()
-            val value = this[key].orEmpty()
-            try {
-                when (it.type) {
-                    typeOf<String>() -> value
-                    typeOf<Int>() -> value.toInt()
-                    typeOf<Long>() -> value.toLong()
-                    typeOf<Float>() -> value.toFloat()
-                    typeOf<Double>() -> value.toDouble()
-                    else ->
-                        throw UnsupportedTInException(
-                            kClass.qualifiedName.orEmpty(),
-                        )
-                }
-            } catch (_: NumberFormatException) {
-                if (!it.type.isMarkedNullable) {
-                    missingParameters.add(key)
-                }
-                null
+    val parameters = constructor.parameters.associateWith {
+        val key = it.name.orEmpty()
+        val value = this[key].orEmpty()
+        try {
+            when (it.type) {
+                typeOf<String>() -> value
+                typeOf<Int>() -> value.toInt()
+                typeOf<Long>() -> value.toLong()
+                typeOf<Float>() -> value.toFloat()
+                typeOf<Double>() -> value.toDouble()
+                else ->
+                    throw UnsupportedTInException(
+                        kClass.qualifiedName.orEmpty(),
+                    )
             }
+        } catch (_: NumberFormatException) {
+            if (!it.type.isMarkedNullable) {
+                missingParameters.add(key)
+            }
+            null
         }
+    }
 
     if (missingParameters.isNotEmpty()) {
         throw MissingParametersException(missingParameters)
@@ -121,7 +139,9 @@ internal inline fun <reified T : Any> Parameters.toDataClass(): T {
 }
 
 @PublishedApi
-internal suspend inline fun <reified TPath : Any> RoutingContext.withPathParams(
+internal suspend inline fun <
+    reified TPath : Any,
+> RoutingContext.withPathParams(
     body: RoutingContext.(TPath) -> Unit,
 ) {
     val pathParams =
@@ -186,9 +206,8 @@ class UnsupportedTInException(
     private val className: String,
 ) : Exception() {
     override val message
-        get() =
-            "GET receive not supported for '$className'" +
-                "-- Hint: Use POST instead"
+        get() = "GET receive not supported for '$className'" +
+            "-- Hint: Use POST instead"
 }
 
 class MissingParametersException(

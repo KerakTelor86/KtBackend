@@ -8,10 +8,11 @@ import kotlinx.serialization.Serializable
 interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
     companion object Builder {
         fun <TPath : Any, TIn : Any, TOut : Any> createHttpHandler(
-            body: suspend (pathParams: TPath, data: TIn) -> TOut,
+            body: suspend (pathParams: TPath, data: TIn) -> Response<TOut>,
         ) = object : Handler<TPath, TIn, TOut, Exception> {
-            override suspend fun invoke(request: Request<TPath, TIn>): TOut =
-                body(request.pathParams, request.data)
+            override suspend fun invoke(
+                request: Request<TPath, TIn>,
+            ): Response<TOut> = body(request.pathParams, request.data)
         }
 
         fun <TPath : Any, TIn : Any, TOut : Any, TErr : Exception> Handler<
@@ -22,8 +23,9 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
         >.withExceptionHandler(
             body: suspend (exception: TErr) -> Response<Any>,
         ) = object : Handler<TPath, TIn, TOut, TErr> {
-            override suspend fun invoke(request: Request<TPath, TIn>): TOut =
-                this@withExceptionHandler(request)
+            override suspend fun invoke(
+                request: Request<TPath, TIn>,
+            ): Response<TOut> = this@withExceptionHandler(request)
 
             override suspend fun transformException(
                 exception: TErr,
@@ -31,7 +33,7 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
         }
     }
 
-    suspend operator fun invoke(request: Request<TPath, TIn>): TOut
+    suspend operator fun invoke(request: Request<TPath, TIn>): Response<TOut>
 
     suspend fun transformException(exception: TErr): Response<Any> =
         throw exception
@@ -48,6 +50,15 @@ data class Request<TPath, TIn>(
 sealed class Response<TData> {
     abstract val statusCode: HttpStatusCode
     abstract val data: TData
+
+    companion object Builder {
+        fun <T> ok(body: () -> T) = Ok(body())
+
+        fun <T> err(
+            statusCode: HttpStatusCode,
+            body: () -> T,
+        ) = Error(statusCode, body())
+    }
 
     data class Ok<TData>(
         override val data: TData,
