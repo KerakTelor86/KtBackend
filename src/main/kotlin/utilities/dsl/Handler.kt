@@ -9,12 +9,10 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
     companion object Builder {
         fun <TPath : Any, TIn : Any, TOut : Any> createHttpHandler(
             body: suspend (pathParams: TPath, data: TIn) -> TOut,
-        ): Handler<TPath, TIn, TOut, Exception> =
-            object : Handler<TPath, TIn, TOut, Exception> {
-                override suspend fun invoke(
-                    request: Request<TPath, TIn>,
-                ): TOut = body(request.pathParams, request.data)
-            }
+        ) = object : Handler<TPath, TIn, TOut, Exception> {
+            override suspend fun invoke(request: Request<TPath, TIn>): TOut =
+                body(request.pathParams, request.data)
+        }
 
         fun <TPath : Any, TIn : Any, TOut : Any, TErr : Exception> Handler<
             TPath,
@@ -23,16 +21,14 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
             Exception,
         >.withExceptionHandler(
             body: suspend (exception: TErr) -> Response<Any>,
-        ): Handler<TPath, TIn, TOut, TErr> =
-            object : Handler<TPath, TIn, TOut, TErr> {
-                override suspend fun invoke(
-                    request: Request<TPath, TIn>,
-                ): TOut = this@withExceptionHandler(request)
+        ) = object : Handler<TPath, TIn, TOut, TErr> {
+            override suspend fun invoke(request: Request<TPath, TIn>): TOut =
+                this@withExceptionHandler(request)
 
-                override suspend fun transformException(
-                    exception: TErr,
-                ): Response<Any> = body(exception)
-            }
+            override suspend fun transformException(
+                exception: TErr,
+            ): Response<Any> = body(exception)
+        }
     }
 
     suspend operator fun invoke(request: Request<TPath, TIn>): TOut
