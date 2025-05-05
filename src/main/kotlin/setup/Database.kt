@@ -2,7 +2,9 @@ package me.keraktelor.setup
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import de.neonew.exposed.migrations.runMigrations
 import io.ktor.server.application.*
+import me.keraktelor.migrations.migrations
 import org.jetbrains.exposed.sql.Database
 
 fun Application.setupDatabase() {
@@ -20,9 +22,14 @@ fun Application.setupDatabase() {
             username = getPgConfig("auth.username")
             password = getPgConfig("auth.password")
         }
+        dataSourceProperties.apply {
+            set("databaseName", dbName)
+        }
     }
 
     val hikariDataSource = HikariDataSource(hikariConfig)
 
     Database.connect(hikariDataSource)
+
+    runMigrations(migrations)
 }

@@ -17,6 +17,7 @@ application {
 repositories {
     mavenCentral()
     maven { url = uri("https://packages.confluent.io/maven/") }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -26,7 +27,10 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.datetime)
+    implementation(libs.exposed.migrations)
     implementation(libs.h2)
     implementation(libs.postgres)
     implementation(libs.ktor.server.compression)
@@ -35,6 +39,7 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.kotlinx.datetime)
     implementation(libs.hikari.cp)
+    implementation(libs.kotlin.logging)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

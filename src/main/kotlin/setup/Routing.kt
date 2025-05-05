@@ -14,6 +14,7 @@ fun Application.setupRouting() {
 
     routing {
         defaultRoutes()
+
         authController()
     }
 }
