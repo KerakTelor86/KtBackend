@@ -1,7 +1,30 @@
 package me.keraktelor.utilities.validation
 
-import io.ktor.server.plugins.requestvalidation.*
+data class ValidationRequirement(
+    val description: String,
+    val validate: () -> Boolean,
+) {
+    companion object Builder {
+        fun require(
+            description: String,
+            body: () -> Boolean,
+        ): ValidationRequirement =
+            ValidationRequirement(
+                description = description,
+                validate = body,
+            )
+    }
+}
 
-interface Validatable {
-    fun validate(): ValidationResult
+interface RequiresValidation {
+    val requirements: List<ValidationRequirement>
+
+    fun getFailedReasons(): List<String> =
+        requirements.mapNotNull { (description, validate) ->
+            val isValid = validate()
+            when (isValid) {
+                true -> null
+                false -> description
+            }
+        }
 }

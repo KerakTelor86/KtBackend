@@ -10,4 +10,10 @@ internal class AuthServiceImpl : AuthService {
     override suspend fun login(request: LoginServiceReq): LoginServiceRes {
         TODO("Not yet implemented")
     }
+
+    override suspend fun refresh(
+        request: RefreshServiceReq,
+    ): RefreshServiceRes {
+        TODO("Not yet implemented")
+    }
 }

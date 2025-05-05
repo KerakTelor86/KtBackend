@@ -3,13 +3,11 @@
 package me.keraktelor.utilities.dsl
 
 import io.ktor.http.*
-import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.logging.*
-import kotlinx.serialization.Serializable
-import me.keraktelor.utilities.validation.Validatable
+import me.keraktelor.utilities.validation.RequiresValidation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
@@ -21,7 +19,7 @@ inline fun <
     reified TErr : Exception,
 > Routing.typedGet(
     handler: Handler<TPath, TIn, TOut, TErr>,
-) = typedGet("", handler)
+) = typedGet("/", handler)
 
 @JvmName("typedPostNoRoute")
 inline fun <
@@ -31,7 +29,27 @@ inline fun <
     reified TErr : Exception,
 > Routing.typedPost(
     handler: Handler<TPath, TIn, TOut, TErr>,
-) = typedPost("", handler)
+) = typedPost("/", handler)
+
+@JvmName("typedPutNoRoute")
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedPut(
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) = typedPut("/", handler)
+
+@JvmName("typedDeleteNoRoute")
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedDelete(
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) = typedDelete("/", handler)
 
 inline fun <
     reified TPath : Any,
@@ -54,9 +72,9 @@ inline fun <
                     } catch (e: MissingParametersException) {
                         call.respond(
                             HttpStatusCode.BadRequest,
-                            MessageAndListResponse(
-                                message = e.message,
-                                list = e.fieldNames,
+                            mapOf(
+                                "message" to e.message,
+                                "list" to e.fieldNames,
                             ),
                         )
                         return@catchAndLogInternalServerErrors
@@ -88,7 +106,72 @@ inline fun <
                     } catch (e: ContentTransformationException) {
                         call.respond(
                             HttpStatusCode.BadRequest,
-                            MessageResponse(e.message.orEmpty()),
+                            mapOf("message" to e.message.orEmpty()),
+                        )
+                        return@catchAndLogInternalServerErrors
+                    }
+                }
+            }
+        }
+    }
+}
+
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedPut(
+    path: String,
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) {
+    put(path) {
+        catchAndLogInternalServerErrors {
+            withPathParams<TPath> { pathParams ->
+                callHandlerWith(handler) {
+                    try {
+                        Request(
+                            pathParams = pathParams,
+                            data = call.receive<TIn>(),
+                        )
+                    } catch (e: ContentTransformationException) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            mapOf("message" to e.message.orEmpty()),
+                        )
+                        return@catchAndLogInternalServerErrors
+                    }
+                }
+            }
+        }
+    }
+}
+
+inline fun <
+    reified TPath : Any,
+    reified TIn : Any,
+    reified TOut : Any,
+    reified TErr : Exception,
+> Routing.typedDelete(
+    path: String,
+    handler: Handler<TPath, TIn, TOut, TErr>,
+) {
+    delete(path) {
+        catchAndLogInternalServerErrors {
+            withPathParams<TPath> { pathParams ->
+                callHandlerWith(handler) {
+                    try {
+                        Request(
+                            pathParams = pathParams,
+                            data = call.queryParameters.toDataClass<TIn>(),
+                        )
+                    } catch (e: MissingParametersException) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            mapOf(
+                                "message" to e.message,
+                                "list" to e.fieldNames,
+                            ),
                         )
                         return@catchAndLogInternalServerErrors
                     }
@@ -150,9 +233,9 @@ internal suspend inline fun <
         } catch (e: MissingParametersException) {
             return call.respond(
                 HttpStatusCode.BadRequest,
-                MessageAndListResponse(
-                    message = e.message,
-                    list = e.fieldNames,
+                mapOf(
+                    "message" to e.message,
+                    "list" to e.fieldNames,
                 ),
             )
         }
@@ -172,27 +255,27 @@ internal suspend inline fun <
 ) {
     val request = body()
 
-    if (request.pathParams is Validatable) {
-        val validationResult = request.pathParams.validate()
-        if (validationResult is ValidationResult.Invalid) {
+    if (request.pathParams is RequiresValidation) {
+        val failedReasons = request.pathParams.getFailedReasons()
+        if (failedReasons.isNotEmpty()) {
             return call.respond(
                 HttpStatusCode.BadRequest,
-                MessageAndListResponse(
-                    message = "Path parameter validation failed",
-                    list = validationResult.reasons,
+                mapOf(
+                    "message" to "Path parameter validation failed",
+                    "reasons" to failedReasons,
                 ),
             )
         }
     }
 
-    if (request.data is Validatable) {
-        val validationResult = request.data.validate()
-        if (validationResult is ValidationResult.Invalid) {
+    if (request.data is RequiresValidation) {
+        val failedReasons = request.data.getFailedReasons()
+        if (failedReasons.isNotEmpty()) {
             return call.respond(
                 HttpStatusCode.BadRequest,
-                MessageAndListResponse(
-                    message = "Request data validation failed",
-                    list = validationResult.reasons,
+                mapOf(
+                    "message" to "Path parameter validation failed",
+                    "reasons" to failedReasons,
                 ),
             )
         }
@@ -206,7 +289,7 @@ class UnsupportedTInException(
     private val className: String,
 ) : Exception() {
     override val message
-        get() = "GET receive not supported for '$className'" +
+        get() = "Query param bind not supported for '$className'" +
             "-- Hint: Use POST instead"
 }
 
@@ -220,19 +303,6 @@ class MissingParametersException(
 private val exceptionLogger = KtorSimpleLogger("dsl.routing.uncaughtException")
 
 @PublishedApi
-@Serializable
-internal data class MessageResponse(
-    val message: String,
-)
-
-@PublishedApi
-@Serializable
-internal data class MessageAndListResponse<T>(
-    val message: String,
-    val list: List<T>,
-)
-
-@PublishedApi
 internal suspend fun RoutingContext.catchAndLogInternalServerErrors(
     body: suspend RoutingContext.() -> Unit,
 ) {
@@ -241,7 +311,7 @@ internal suspend fun RoutingContext.catchAndLogInternalServerErrors(
     } catch (e: Exception) {
         call.respond(
             HttpStatusCode.InternalServerError,
-            MessageResponse("Internal server error"),
+            mapOf("message" to "Internal server error"),
         )
         exceptionLogger.error(e)
     }

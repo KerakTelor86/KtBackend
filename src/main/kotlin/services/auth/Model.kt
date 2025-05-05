@@ -11,7 +11,9 @@ sealed class RegisterServiceRes {
         val accessToken: String,
     ) : RegisterServiceRes()
 
-    sealed class Error : RegisterServiceRes()
+    sealed class Error : RegisterServiceRes() {
+        data object DuplicateUser : Error()
+    }
 }
 
 data class LoginServiceReq(
@@ -28,4 +30,14 @@ sealed class LoginServiceRes {
     sealed class Error : LoginServiceRes() {
         data object InvalidCredentials : Error()
     }
+}
+
+data class RefreshServiceReq(
+    val refreshToken: String,
+)
+
+sealed class RefreshServiceRes {
+    data class Ok(
+        val accessToken: String,
+    ) : RefreshServiceRes()
 }

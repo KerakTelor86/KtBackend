@@ -21,7 +21,7 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
             TOut,
             Exception,
         >.withExceptionHandler(
-            body: suspend (exception: TErr) -> Response<Any>,
+            body: suspend (exception: TErr) -> Response<TOut>,
         ) = object : Handler<TPath, TIn, TOut, TErr> {
             override suspend fun invoke(
                 request: Request<TPath, TIn>,
@@ -29,13 +29,13 @@ interface Handler<TPath : Any, TIn : Any, TOut : Any, TErr : Exception> {
 
             override suspend fun transformException(
                 exception: TErr,
-            ): Response<Any> = body(exception)
+            ): Response<TOut> = body(exception)
         }
     }
 
     suspend operator fun invoke(request: Request<TPath, TIn>): Response<TOut>
 
-    suspend fun transformException(exception: TErr): Response<Any> =
+    suspend fun transformException(exception: TErr): Response<TOut> =
         throw exception
 }
 
@@ -47,45 +47,39 @@ data class Request<TPath, TIn>(
     val data: TIn,
 )
 
-sealed class Response<TData> {
-    abstract val statusCode: HttpStatusCode
-    abstract val data: TData
-
+data class Response<TData>(
+    val statusCode: HttpStatusCode,
+    val data: TData,
+) {
     companion object Builder {
-        fun <T> ok(body: () -> T) = Ok(body())
+        fun <T> ok(body: () -> T) = Response(HttpStatusCode.OK, body())
+
+        fun <T> created(body: () -> T) =
+            Response(HttpStatusCode.Created, body())
 
         fun <T> badRequest(body: () -> T) =
-            Error(HttpStatusCode.BadRequest, body())
+            Response(HttpStatusCode.BadRequest, body())
 
         fun <T> unauthorized(body: () -> T) =
-            Error(HttpStatusCode.Unauthorized, body())
+            Response(HttpStatusCode.Unauthorized, body())
 
         fun <T> forbidden(body: () -> T) =
-            Error(HttpStatusCode.Forbidden, body())
+            Response(HttpStatusCode.Forbidden, body())
+
+        fun <T> conflict(body: () -> T) =
+            Response(HttpStatusCode.Conflict, body())
 
         fun <T> tooManyRequests(body: () -> T) =
-            Error(HttpStatusCode.TooManyRequests, body())
+            Response(HttpStatusCode.TooManyRequests, body())
 
-        fun <T> internalServerError(body: () -> T) =
-            Error(HttpStatusCode.InternalServerError, body())
+        fun <T> internalServerResponse(body: () -> T) =
+            Response(HttpStatusCode.InternalServerError, body())
 
-        fun <T> errorWithStatus(
+        fun <T> responseWithStatus(
             statusCode: HttpStatusCode,
             body: () -> T,
-        ) = Error(statusCode, body())
+        ) = Response(statusCode, body())
     }
-
-    data class Ok<TData>(
-        override val data: TData,
-    ) : Response<TData>() {
-        override val statusCode
-            get() = HttpStatusCode.OK
-    }
-
-    data class Error<TData>(
-        override val statusCode: HttpStatusCode,
-        override val data: TData,
-    ) : Response<TData>()
 }
 
 @PublishedApi
@@ -96,9 +90,9 @@ internal suspend inline fun <
     reified TErr : Exception,
 > Handler<TPath, TIn, TOut, TErr>.handle(
     request: Request<TPath, TIn>,
-): Response<Any> =
+): Response<TOut> =
     try {
-        Response.Ok(this(request))
+        this(request)
     } catch (e: Exception) {
         if (e is TErr) {
             transformException(e)

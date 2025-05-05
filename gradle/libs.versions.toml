@@ -1,11 +1,13 @@
 [versions]
 exposed-version = "0.61.0"
 h2-version = "2.3.232"
+postgres-version = "42.7.5"
 koin-version = "4.1.0-Beta8"
 kotlin-version = "2.1.10"
 ktor-version = "3.1.2"
 logback-version = "1.4.14"
 datetime-version = "0.6.2"
+hikari-version = "6.3.0"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor3", version.ref = "koin-version" }
@@ -16,14 +18,15 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
 h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
+postgres = { module = "org.postgresql:postgresql", version.ref = "postgres-version" }
 ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor-version" }
-ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor-version" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime-version" }
+hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

@@ -11,4 +11,6 @@ interface AuthService {
     suspend fun register(request: RegisterServiceReq): RegisterServiceRes
 
     suspend fun login(request: LoginServiceReq): LoginServiceRes
+
+    suspend fun refresh(request: RefreshServiceReq): RefreshServiceRes
 }
