@@ -25,7 +25,8 @@ fun AuthController.getRegisterHandler() =
             is RegisterServiceRes.Ok -> ok {
                 RegisterHandlerResponse.Ok(
                     userId = result.userId,
-                    accessToken = result.accessToken,
+                    accessToken = result.tokens.access,
+                    refreshToken = result.tokens.refresh,
                 )
             }
 
@@ -59,6 +60,7 @@ sealed class RegisterHandlerResponse {
     data class Ok(
         val userId: String,
         val accessToken: String,
+        val refreshToken: String,
     ) : RegisterHandlerResponse()
 
     @Serializable

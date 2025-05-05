@@ -1,12 +1,32 @@
 package me.keraktelor.repositories.auth
 
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.javatime.datetime
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toKotlinLocalDateTime
+import me.keraktelor.utilities.datetime.localDateTimeNow
+import java.util.*
 
-object Users : UUIDTable("users") {
-    val username = text("username").uniqueIndex()
-    val isActive = bool("is_active").index()
-    val password = text("password")
-    val lastLogin = datetime("last_login")
-    val createdAt = datetime("created_at")
+data class User(
+    val id: UUID,
+    val username: String,
+    val password: String,
+    val lastLogin: LocalDateTime?,
+    val createdAt: LocalDateTime,
+) {
+    constructor(username: String, password: String) : this(
+        id = UUID.randomUUID(),
+        username = username,
+        password = password,
+        lastLogin = null,
+        createdAt = localDateTimeNow(),
+    )
+
+    companion object {
+        fun UserEntity.toUser(): User = User(
+            id = id.value,
+            username = username,
+            password = password,
+            lastLogin = lastLogin?.toKotlinLocalDateTime(),
+            createdAt = createdAt.toKotlinLocalDateTime(),
+        )
+    }
 }

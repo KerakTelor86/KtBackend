@@ -22,7 +22,8 @@ fun AuthController.getLoginHandler() =
             is LoginServiceRes.Ok -> ok {
                 LoginHandlerResponse.Ok(
                     userId = result.userId,
-                    accessToken = result.accessToken,
+                    accessToken = result.tokens.access,
+                    refreshToken = result.tokens.refresh,
                 )
             }
 
@@ -46,6 +47,7 @@ sealed class LoginHandlerResponse {
     data class Ok(
         val userId: String,
         val accessToken: String,
+        val refreshToken: String,
     ) : LoginHandlerResponse()
 
     @Serializable

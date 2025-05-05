@@ -1,5 +1,10 @@
 package me.keraktelor.services.auth
 
+data class AuthToken(
+    val access: String,
+    val refresh: String,
+)
+
 data class RegisterServiceReq(
     val username: String,
     val password: String,
@@ -8,7 +13,7 @@ data class RegisterServiceReq(
 sealed class RegisterServiceRes {
     data class Ok(
         val userId: String,
-        val accessToken: String,
+        val tokens: AuthToken,
     ) : RegisterServiceRes()
 
     sealed class Error : RegisterServiceRes() {
@@ -24,7 +29,7 @@ data class LoginServiceReq(
 sealed class LoginServiceRes {
     data class Ok(
         val userId: String,
-        val accessToken: String,
+        val tokens: AuthToken,
     ) : LoginServiceRes()
 
     sealed class Error : LoginServiceRes() {
