@@ -11,7 +11,7 @@ import me.keraktelor.utilities.dsl.Response.Builder.ok
 
 fun AuthController.getLoginHandler() =
     createHttpHandler { _: Blank, request: LoginHandlerRequest ->
-        val result = this.authService.login(
+        val result = authService.login(
             LoginServiceReq(
                 username = request.username,
                 password = request.password,

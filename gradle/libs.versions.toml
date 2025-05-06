@@ -10,6 +10,7 @@ datetime-version = "0.6.2"
 hikari-version = "6.3.0"
 exposed-migrations-version = "3.7.0"
 kotlinlogging-version = "7.0.7"
+jbcrypt-version = "0.4"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor3", version.ref = "koin-version" }
@@ -33,6 +34,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime-version" }
 hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari-version" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlinlogging-version" }
+jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

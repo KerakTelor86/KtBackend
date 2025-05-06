@@ -4,12 +4,14 @@ ktor:
       - me.keraktelor.ApplicationKt.module
   deployment:
     port: "$PORT:8080"
-database:
-  postgres:
-    auth:
-      username: "$DB_USER:postgres"
-      password: "$DB_PASSWORD:postgres"
-    connection:
-      host: "$HOST:localhost"
-      port: "$PORT:5432"
-    database: "$DB_NAME:backend"
+postgres:
+  auth:
+    username: "$DB_USER:postgres"
+    password: "$DB_PASSWORD:postgres"
+  connection:
+    host: "$HOST:localhost"
+    port: "$PORT:5432"
+  database: "$DB_NAME:backend"
+crypto:
+  bcrypt:
+    rounds: "$BCRYPT_ROUNDS:12"

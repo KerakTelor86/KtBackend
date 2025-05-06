@@ -10,7 +10,7 @@ import me.keraktelor.utilities.dsl.Response.Builder.ok
 
 fun AuthController.getRefreshHandler() =
     createHttpHandler { _: Blank, request: RefreshHandlerRequest ->
-        val result = this.authService.refresh(
+        val result = authService.refresh(
             RefreshServiceReq(refreshToken = request.refreshToken),
         )
 

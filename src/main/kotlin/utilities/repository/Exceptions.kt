@@ -3,23 +3,32 @@ package me.keraktelor.utilities.repository
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 // https://www.postgresql.org/docs/10/errcodes-appendix.html
-sealed class SqlError {
+@Suppress("unused")
+sealed class SqlError(
+    val exception: ExposedSQLException,
+) {
     companion object {
         fun ExposedSQLException.toSqlError(): SqlError = when (this.errorCode) {
-            23502 -> NotNullViolationError
-            23503 -> ForeignKeyViolationError
-            23505 -> UniqueViolationError
+            23502 -> NotNullViolationError(this)
+            23503 -> ForeignKeyViolationError(this)
+            23505 -> UniqueViolationError(this)
             else -> UnhandledSqlError(this)
         }
     }
 
-    data object NotNullViolationError : SqlError()
+    class NotNullViolationError(
+        e: ExposedSQLException,
+    ) : SqlError(e)
 
-    data object ForeignKeyViolationError : SqlError()
+    class ForeignKeyViolationError(
+        e: ExposedSQLException,
+    ) : SqlError(e)
 
-    data object UniqueViolationError : SqlError()
+    class UniqueViolationError(
+        e: ExposedSQLException,
+    ) : SqlError(e)
 
-    data class UnhandledSqlError(
-        val exception: ExposedSQLException,
-    ) : SqlError()
+    class UnhandledSqlError(
+        e: ExposedSQLException,
+    ) : SqlError(e)
 }

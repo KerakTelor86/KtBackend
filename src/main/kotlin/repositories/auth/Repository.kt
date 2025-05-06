@@ -1,57 +1,50 @@
 package me.keraktelor.repositories.auth
 
-import kotlinx.datetime.toJavaLocalDateTime
-import me.keraktelor.repositories.auth.User.Companion.toUser
-import me.keraktelor.utilities.repository.SqlError
-import me.keraktelor.utilities.repository.SqlError.Companion.toSqlError
-import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
 
 class AuthRepositoryImpl : AuthRepository {
-    override fun create(user: User): User? = transaction {
-        try {
-            val entity = UserEntity.new(user.id) {
-                username = user.username
-                password = user.password
-                createdAt = user.createdAt.toJavaLocalDateTime()
-            }
-
-            entity.toUser()
-        } catch (e: ExposedSQLException) {
-            when (e.toSqlError()) {
-                SqlError.UniqueViolationError -> null
-                else -> throw e
-            }
+    override suspend fun create(
+        username: String,
+        password: String,
+    ): User? = newSuspendedTransaction {
+        if (findByUsername(username) != null) {
+            return@newSuspendedTransaction null
         }
-    }
 
-    override fun findById(id: UUID): User? = transaction {
-        val entity = UserEntity
-            .find {
-                (UsersTable.id eq id) and (UsersTable.isActive eq true)
-            }.firstOrNull() ?: return@transaction null
-
-        entity.toUser()
-    }
-
-    override fun deleteById(id: UUID): User? = transaction {
-        val entity = UserEntity.findById(id) ?: return@transaction null
-
-        entity
-            .apply {
-                isActive = false
+        UserEntity
+            .new {
+                this.username = username
+                this.password = password
             }.toUser()
     }
 
-    override fun findByUsername(username: String): User? = transaction {
-        val entity = UserEntity
-            .find {
-                (UsersTable.username eq username) and
-                    (UsersTable.isActive eq true)
-            }.firstOrNull() ?: return@transaction null
+    override suspend fun findById(id: UUID): User? =
+        newSuspendedTransaction {
+            findActiveUserBy { UsersTable.id eq id }.firstOrNull()?.toUser()
+        }
 
-        entity.toUser()
+    override suspend fun deactivateById(id: UUID): User? =
+        newSuspendedTransaction {
+            findActiveUserBy { UsersTable.id eq id }
+                .firstOrNull()
+                ?.apply { isActive = false }
+                ?.toUser()
+        }
+
+    override suspend fun findByUsername(username: String): User? =
+        newSuspendedTransaction {
+            findActiveUserBy { UsersTable.username eq username }
+                .firstOrNull()
+                ?.toUser()
+        }
+
+    private fun findActiveUserBy(
+        predicate: SqlExpressionBuilder.() -> Op<Boolean>,
+    ) = UserEntity.find {
+        (UsersTable.isActive eq true) and predicate()
     }
 }

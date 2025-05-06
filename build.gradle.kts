@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.hikari.cp)
     implementation(libs.kotlin.logging)
+    implementation(libs.jbcrypt)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

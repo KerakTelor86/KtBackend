@@ -1,5 +1,8 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package me.keraktelor.repositories.auth
 
+import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -19,6 +22,14 @@ class UserEntity(
     id: EntityID<UUID>,
 ) : UUIDEntity(id) {
     companion object : UUIDEntityClass<UserEntity>(UsersTable)
+
+    fun toUser(): User = User(
+        id = id.value,
+        username = username,
+        password = password,
+        lastLogin = lastLogin?.toKotlinLocalDateTime(),
+        createdAt = createdAt.toKotlinLocalDateTime(),
+    )
 
     var username by UsersTable.username
     var password by UsersTable.password

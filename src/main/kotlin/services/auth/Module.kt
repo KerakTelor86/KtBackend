@@ -1,10 +1,13 @@
 package me.keraktelor.services.auth
 
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 
 fun Module.authService() {
-    singleOf<AuthService>(::AuthServiceImpl)
+    singleOf(::AuthServiceImpl) {
+        bind<AuthService>()
+    }
 }
 
 interface AuthService {
