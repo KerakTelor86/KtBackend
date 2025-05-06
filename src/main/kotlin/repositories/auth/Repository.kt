@@ -3,16 +3,16 @@ package me.keraktelor.repositories.auth
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class AuthRepositoryImpl : AuthRepository {
-    override suspend fun create(
+    override fun create(
         username: String,
         password: String,
-    ): User? = newSuspendedTransaction {
+    ): User? = transaction {
         if (findByUsername(username) != null) {
-            return@newSuspendedTransaction null
+            return@transaction null
         }
 
         UserEntity
@@ -22,21 +22,21 @@ class AuthRepositoryImpl : AuthRepository {
             }.toUser()
     }
 
-    override suspend fun findById(id: UUID): User? =
-        newSuspendedTransaction {
+    override fun findById(id: UUID): User? =
+        transaction {
             findActiveUserBy { UsersTable.id eq id }.firstOrNull()?.toUser()
         }
 
-    override suspend fun deactivateById(id: UUID): User? =
-        newSuspendedTransaction {
+    override fun deactivateById(id: UUID): User? =
+        transaction {
             findActiveUserBy { UsersTable.id eq id }
                 .firstOrNull()
                 ?.apply { isActive = false }
                 ?.toUser()
         }
 
-    override suspend fun findByUsername(username: String): User? =
-        newSuspendedTransaction {
+    override fun findByUsername(username: String): User? =
+        transaction {
             findActiveUserBy { UsersTable.username eq username }
                 .firstOrNull()
                 ?.toUser()
