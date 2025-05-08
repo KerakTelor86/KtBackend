@@ -26,7 +26,7 @@ exposed-migrations = { module = "com.github.Suwayomi:exposed-migrations", versio
 h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
 postgres = { module = "org.postgresql:postgresql", version.ref = "postgres-version" }
 ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor-version" }
-ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-version" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }

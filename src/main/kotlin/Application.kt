@@ -1,7 +1,7 @@
 package me.keraktelor
 
 import io.ktor.server.application.*
-import io.ktor.server.cio.*
+import io.ktor.server.netty.*
 import me.keraktelor.setup.setupCompression
 import me.keraktelor.setup.setupInjection
 import me.keraktelor.setup.setupRouting

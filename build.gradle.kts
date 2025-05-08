@@ -8,7 +8,7 @@ group = "me.keraktelor"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.cio.EngineMain"
+    mainClass = "io.ktor.server.netty.EngineMain"
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -34,7 +34,7 @@ dependencies {
     implementation(libs.h2)
     implementation(libs.postgres)
     implementation(libs.ktor.server.compression)
-    implementation(libs.ktor.server.cio)
+    implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.kotlinx.datetime)
