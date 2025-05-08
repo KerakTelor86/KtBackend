@@ -120,22 +120,21 @@ private fun Scope.readConfig(): Config {
     return constructConfig(Config::class)
 }
 
-private fun ApplicationConfigValue.toValue(type: KType): Any =
-    when (type) {
-        typeOf<String>() -> this.getString()
-        typeOf<Int>() -> this.getString().toInt()
-        typeOf<Long>() -> this.getString().toLong()
-        typeOf<Float>() -> this.getString().toFloat()
-        typeOf<Double>() -> this.getString().toDouble()
-        typeOf<List<String>>() -> this.getList()
-        typeOf<List<Int>>() -> this.getList().map(String::toInt)
-        typeOf<List<Long>>() -> this.getList().map(String::toInt)
-        typeOf<List<Float>>() -> this.getList().map(String::toFloat)
-        typeOf<List<Double>>() -> this.getList().map(String::toDouble)
+private fun ApplicationConfigValue.toValue(type: KType): Any = when (type) {
+    typeOf<String>() -> this.getString()
+    typeOf<Int>() -> this.getString().toInt()
+    typeOf<Long>() -> this.getString().toLong()
+    typeOf<Float>() -> this.getString().toFloat()
+    typeOf<Double>() -> this.getString().toDouble()
+    typeOf<List<String>>() -> this.getList()
+    typeOf<List<Int>>() -> this.getList().map(String::toInt)
+    typeOf<List<Long>>() -> this.getList().map(String::toInt)
+    typeOf<List<Float>>() -> this.getList().map(String::toFloat)
+    typeOf<List<Double>>() -> this.getList().map(String::toDouble)
 
-        else -> throw IllegalArgumentException(
-            "Unhandled type while reading config ${
-                (type.classifier!! as KClass<*>).getFullName()
-            }",
-        )
-    }
+    else -> throw IllegalArgumentException(
+        "Unhandled type while reading config ${
+            (type.classifier!! as KClass<*>).getFullName()
+        }",
+    )
+}

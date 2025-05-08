@@ -12,11 +12,11 @@ fun Module.authRepository() {
 }
 
 interface AuthRepository {
-    fun create(username: String, password: String): User?
+    suspend fun create(username: String, password: String): User?
 
-    fun findById(id: UUID): User?
+    suspend fun findById(id: UUID): User?
 
-    fun deactivateById(id: UUID): User?
+    suspend fun deactivateById(id: UUID): User?
 
-    fun findByUsername(username: String): User?
+    suspend fun findByUsername(username: String): User?
 }
