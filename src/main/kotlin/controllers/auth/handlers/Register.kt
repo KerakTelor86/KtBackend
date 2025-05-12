@@ -10,7 +10,7 @@ import me.keraktelor.utilities.dsl.Response.Builder.badRequest
 import me.keraktelor.utilities.dsl.Response.Builder.ok
 import me.keraktelor.utilities.validation.RequiresValidation
 import me.keraktelor.utilities.validation.ValidationRequirement
-import me.keraktelor.utilities.validation.ValidationRequirement.Builder.require
+import me.keraktelor.utilities.validation.ValidationRequirement.Builder.verify
 
 fun AuthController.getRegisterHandler() =
     createHttpHandler { _: Blank, request: RegisterHandlerRequest ->
@@ -45,10 +45,10 @@ data class RegisterHandlerRequest(
 ) : RequiresValidation {
     override val requirements: List<ValidationRequirement>
         get() = listOf(
-            require("Username length should be within 6-32 characters") {
+            verify("Username length should be within 6-32 characters") {
                 username.length in 6..32
             },
-            require("Password length should be at least 6 characters") {
+            verify("Password length should be at least 6 characters") {
                 password.length >= 6
             },
         )

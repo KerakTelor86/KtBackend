@@ -1,6 +1,5 @@
 package me.keraktelor.setup
 
-import com.zaxxer.hikari.HikariConfig
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.util.logging.*
@@ -14,7 +13,6 @@ import kotlin.reflect.typeOf
 
 val configModule = module {
     single { readConfig() }
-    single { getHikariConfig() }
 }
 
 data class Config(
@@ -48,24 +46,6 @@ data class Config(
 
 private val configLogger = KtorSimpleLogger("setup.config")
 
-private fun Scope.getHikariConfig(): HikariConfig {
-    val dbConfig = run {
-        val config by inject<Config>()
-        config.postgres
-    }
-
-    return HikariConfig().apply {
-        dataSourceClassName = "org.postgresql.ds.PGSimpleDataSource"
-        dataSourceProperties.apply {
-            set("user", dbConfig.auth.username)
-            set("password", dbConfig.auth.password)
-            set("serverName", dbConfig.connection.host)
-            set("portNumber", dbConfig.connection.port)
-            set("databaseName", dbConfig.database)
-        }
-    }
-}
-
 private fun Scope.readConfig(): Config {
     val application by inject<Application>()
     val configPathBuffer = mutableListOf<String>()
@@ -91,20 +71,20 @@ private fun Scope.readConfig(): Config {
 
             configPathBuffer.add(key)
             try {
-                try {
-                    getConfigAtCurrentPath().toValue(it.type)
-                } catch (_: ApplicationConfigurationException) {
+                getConfigAtCurrentPath().toValue(it.type)
+            } catch (exception: Exception) {
+                if (exception is ApplicationConfigurationException) {
                     // Ktor throws this when config at current path is a map
                     // We use recursion to dive into the map
                     constructConfig(
                         it.type.classifier!! as KClass<*>,
                     )
+                } else {
+                    throw IllegalArgumentException(
+                        "Cannot read config property ${getCurrentPath()}",
+                        exception,
+                    )
                 }
-            } catch (exception: Exception) {
-                throw IllegalArgumentException(
-                    "Cannot read config property ${getCurrentPath()}",
-                    exception,
-                )
             } finally {
                 configPathBuffer.removeLast()
             }

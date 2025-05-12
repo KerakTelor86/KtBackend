@@ -5,7 +5,7 @@ data class ValidationRequirement(
     val validate: () -> Boolean,
 ) {
     companion object Builder {
-        fun require(
+        fun verify(
             description: String,
             body: () -> Boolean,
         ): ValidationRequirement =

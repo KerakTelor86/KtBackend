@@ -1,16 +1,19 @@
 package me.keraktelor.repositories.auth
 
 import me.keraktelor.utilities.exposed.suspendedTransaction
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.and
 import java.util.*
 
-class AuthRepositoryImpl : AuthRepository {
+class AuthRepositoryImpl(
+    private val db: Database,
+) : AuthRepository {
     override suspend fun create(
         username: String,
         password: String,
-    ): User? = suspendedTransaction {
+    ): User? = suspendedTransaction(db = db) {
         if (findByUsername(username) != null) {
             return@suspendedTransaction null
         }
@@ -22,12 +25,13 @@ class AuthRepositoryImpl : AuthRepository {
             }.toUser()
     }
 
-    override suspend fun findById(id: UUID): User? = suspendedTransaction {
-        findActiveUserBy { UsersTable.id eq id }.firstOrNull()?.toUser()
-    }
+    override suspend fun findById(id: UUID): User? =
+        suspendedTransaction(db = db) {
+            findActiveUserBy { UsersTable.id eq id }.firstOrNull()?.toUser()
+        }
 
     override suspend fun deactivateById(id: UUID): User? =
-        suspendedTransaction {
+        suspendedTransaction(db = db) {
             findActiveUserBy { UsersTable.id eq id }
                 .firstOrNull()
                 ?.apply { isActive = false }
@@ -35,7 +39,7 @@ class AuthRepositoryImpl : AuthRepository {
         }
 
     override suspend fun findByUsername(username: String): User? =
-        suspendedTransaction {
+        suspendedTransaction(db = db) {
             findActiveUserBy { UsersTable.username eq username }
                 .firstOrNull()
                 ?.toUser()
