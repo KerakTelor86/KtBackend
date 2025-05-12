@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module(
-    overrideModules: Array<Module> = emptyArray(),
+    vararg overrideModules: Module = emptyArray(),
 ) {
     setupInjection(overrideModules)
     setupSerialization()

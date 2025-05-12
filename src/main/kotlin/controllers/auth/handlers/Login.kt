@@ -6,8 +6,8 @@ import me.keraktelor.services.auth.LoginServiceReq
 import me.keraktelor.services.auth.LoginServiceRes
 import me.keraktelor.utilities.dsl.Blank
 import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
-import me.keraktelor.utilities.dsl.Response.Builder.badRequest
 import me.keraktelor.utilities.dsl.Response.Builder.ok
+import me.keraktelor.utilities.dsl.Response.Builder.unauthorized
 
 fun AuthController.getLoginHandler() =
     createHttpHandler { _: Blank, request: LoginHandlerRequest ->
@@ -27,7 +27,7 @@ fun AuthController.getLoginHandler() =
                 )
             }
 
-            is LoginServiceRes.Error.InvalidCredentials -> badRequest {
+            LoginServiceRes.Error.InvalidCredentials -> unauthorized {
                 LoginHandlerResponse.Error(
                     message = "Invalid credentials",
                 )

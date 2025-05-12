@@ -12,12 +12,12 @@ import kotlin.test.assertEquals
 class ApplicationTest {
     @Test
     fun testRoot() = testApplication {
-        val testDbModule = module {
+        val testModule = module {
             single { getTestConfig() }
             single { getTestDatabase() }
         }
         application {
-            module(arrayOf(testDbModule))
+            module(testModule)
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)

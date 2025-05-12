@@ -10,7 +10,7 @@ import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
 fun Application.setupInjection(
-    overrideModules: Array<Module> = emptyArray(),
+    overrideModules: Array<out Module> = emptyArray(),
 ) {
     install(Koin) {
         slf4jLogger()
