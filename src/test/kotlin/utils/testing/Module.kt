@@ -9,31 +9,26 @@ import org.koin.dsl.koinApplication
 import org.koin.logger.slf4jLogger
 import org.koin.dsl.module as koinModule
 
-private typealias Body = suspend Scope.() -> Unit
+private typealias ModuleBody = Module.() -> Unit
+private typealias TestBody = suspend Scope.() -> Unit
 
 class TestModuleBuilder internal constructor() {
     @PublishedApi
-    internal val modules = mutableListOf<Module>()
-    internal val executables = mutableListOf<Body>()
+    internal val moduleLambdas = mutableListOf<ModuleBody>()
+    internal val testLambdas = mutableListOf<TestBody>()
 
-    fun module(body: Module.() -> Unit) {
-        modules.add(
-            koinModule {
-                body()
-            },
-        )
+    fun module(body: ModuleBody) {
+        moduleLambdas.add(body)
     }
 
     inline fun <reified T : Any> mock() {
-        modules.add(
-            koinModule {
-                single { mockk<T>() }
-            },
-        )
+        moduleLambdas.add {
+            single { mockk<T>() }
+        }
     }
 
-    fun execute(body: Body) {
-        executables.add(body)
+    fun execute(body: TestBody) {
+        testLambdas.add(body)
     }
 }
 
@@ -43,11 +38,13 @@ fun buildTestModule(body: TestModuleBuilder.() -> Unit) {
     koinApplication {
         slf4jLogger(level = Level.NONE)
         modules(
-            *builder.modules.toTypedArray(),
+            koinModule {
+                builder.moduleLambdas.forEach { it() }
+            },
             koinModule {
                 single(createdAtStart = true) {
                     runBlocking {
-                        builder.executables.forEach { it() }
+                        builder.testLambdas.forEach { it() }
                     }
                 }
             },

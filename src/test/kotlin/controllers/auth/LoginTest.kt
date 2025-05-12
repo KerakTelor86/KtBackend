@@ -99,10 +99,10 @@ class LoginTest {
             service: AuthService,
         ) -> Unit,
     ) = buildTestModule {
-        mock<AuthService>()
         module {
             authController()
         }
+        mock<AuthService>()
         execute {
             val controller by inject<AuthController>()
             val service by inject<AuthService>()
