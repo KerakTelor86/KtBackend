@@ -28,6 +28,11 @@ class TestModuleBuilder internal constructor() {
     }
 
     fun execute(body: TestBody) {
+        if (testLambdas.isNotEmpty()) {
+            throw IllegalStateException(
+                "Test module cannot have more than one execute block",
+            )
+        }
         testLambdas.add(body)
     }
 }
