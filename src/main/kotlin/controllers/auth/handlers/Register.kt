@@ -1,12 +1,12 @@
-package me.keraktelor.controllers.auth.handlers
+package controllers.auth.handlers
 
+import controllers.auth.AuthController
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import me.keraktelor.controllers.auth.AuthController
-import me.keraktelor.plugins.*
-import me.keraktelor.plugins.ValidationRequirement.Builder.verify
-import me.keraktelor.services.auth.RegisterServiceReq
-import me.keraktelor.services.auth.RegisterServiceRes
+import plugins.*
+import plugins.ValidationRequirement.Builder.verify
+import services.auth.RegisterServiceReq
+import services.auth.RegisterServiceRes
 
 suspend fun AuthController.handleRegister(
     context: RoutingContext,

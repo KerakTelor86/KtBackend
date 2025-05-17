@@ -1,4 +1,4 @@
-package me.keraktelor.utilities.repository
+package repositories
 
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 

@@ -1,4 +1,4 @@
-package me.keraktelor.setup
+package setup
 
 import io.ktor.server.application.*
 import io.ktor.server.config.*

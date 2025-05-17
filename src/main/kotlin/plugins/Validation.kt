@@ -1,4 +1,4 @@
-package me.keraktelor.plugins
+package plugins
 
 class RequestValidationException(
     val reasons: List<String>,

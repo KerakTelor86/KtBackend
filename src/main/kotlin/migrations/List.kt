@@ -1,4 +1,4 @@
-package me.keraktelor.migrations
+package migrations
 
 val migrations = listOf(
     M0001_AddUserTable(),

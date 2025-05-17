@@ -1,4 +1,4 @@
-package me.keraktelor.repositories.auth
+package repositories.auth
 
 import kotlinx.datetime.LocalDateTime
 import java.util.*

@@ -1,4 +1,4 @@
-package me.keraktelor.services.auth
+package services.auth
 
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind

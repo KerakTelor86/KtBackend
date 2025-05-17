@@ -1,7 +1,7 @@
-package me.keraktelor.repositories
+package repositories
 
-import me.keraktelor.repositories.auth.authRepository
 import org.koin.dsl.module
+import repositories.auth.authRepository
 
 val repositoryModule = module {
     authRepository()

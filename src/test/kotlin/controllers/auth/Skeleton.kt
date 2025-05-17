@@ -7,8 +7,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import io.mockk.mockk
-import me.keraktelor.module
-import me.keraktelor.services.auth.AuthService
+import module
+import services.auth.AuthService
 import utilities.getTestConfig
 import utilities.getTestDatabase
 

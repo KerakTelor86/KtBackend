@@ -1,4 +1,4 @@
-package me.keraktelor.utilities.datetime
+package utilities.datetime
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime

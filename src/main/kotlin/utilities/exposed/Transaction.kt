@@ -1,4 +1,4 @@
-package me.keraktelor.utilities.exposed
+package utilities.exposed
 
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Transaction

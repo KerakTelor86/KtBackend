@@ -1,10 +1,10 @@
-package me.keraktelor.repositories.auth
+package repositories.auth
 
-import me.keraktelor.utilities.exposed.suspendedTransaction
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.and
+import utilities.exposed.suspendedTransaction
 import java.util.*
 
 class AuthRepositoryImpl(

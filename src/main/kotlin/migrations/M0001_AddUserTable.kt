@@ -1,4 +1,4 @@
-package me.keraktelor.migrations
+package migrations
 
 import de.neonew.exposed.migrations.helpers.AddTableMigration
 import org.jetbrains.exposed.dao.id.UUIDTable

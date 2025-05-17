@@ -1,13 +1,13 @@
-package me.keraktelor.controllers.auth.handlers
+package controllers.auth.handlers
 
+import controllers.auth.AuthController
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import me.keraktelor.controllers.auth.AuthController
-import me.keraktelor.plugins.ok
-import me.keraktelor.plugins.receiveValidatedBody
-import me.keraktelor.plugins.unauthorized
-import me.keraktelor.services.auth.LoginServiceReq
-import me.keraktelor.services.auth.LoginServiceRes
+import plugins.ok
+import plugins.receiveValidatedBody
+import plugins.unauthorized
+import services.auth.LoginServiceReq
+import services.auth.LoginServiceRes
 
 suspend fun AuthController.handleLogin(
     context: RoutingContext,

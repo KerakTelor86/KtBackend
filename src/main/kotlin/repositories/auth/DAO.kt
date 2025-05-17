@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package me.keraktelor.repositories.auth
+package repositories.auth
 
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.dao.UUIDEntity

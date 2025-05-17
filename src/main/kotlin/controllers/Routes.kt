@@ -1,8 +1,8 @@
-package me.keraktelor.controllers
+package controllers
 
+import controllers.auth.authController
 import io.ktor.server.routing.*
-import me.keraktelor.controllers.auth.authController
-import me.keraktelor.plugins.ok
+import plugins.ok
 import java.time.OffsetDateTime
 
 fun Routing.initializeRoutes() {

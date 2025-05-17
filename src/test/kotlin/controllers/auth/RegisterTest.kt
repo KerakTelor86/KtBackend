@@ -1,15 +1,15 @@
 package controllers.auth
 
+import controllers.auth.handlers.RegisterHandlerRequest
+import controllers.auth.handlers.RegisterHandlerResponse
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.coEvery
-import me.keraktelor.controllers.auth.handlers.RegisterHandlerRequest
-import me.keraktelor.controllers.auth.handlers.RegisterHandlerResponse
-import me.keraktelor.plugins.RequestValidationExceptionResponse
-import me.keraktelor.services.auth.AuthToken
-import me.keraktelor.services.auth.RegisterServiceReq
-import me.keraktelor.services.auth.RegisterServiceRes
+import plugins.RequestValidationExceptionResponse
+import services.auth.AuthToken
+import services.auth.RegisterServiceReq
+import services.auth.RegisterServiceRes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

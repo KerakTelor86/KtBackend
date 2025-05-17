@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package me.keraktelor.plugins
+package plugins
 
 import io.ktor.http.*
 import io.ktor.server.response.*

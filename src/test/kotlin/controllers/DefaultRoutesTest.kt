@@ -3,7 +3,7 @@ package controllers
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import me.keraktelor.module
+import module
 import org.koin.dsl.module
 import utilities.getTestConfig
 import utilities.getTestDatabase

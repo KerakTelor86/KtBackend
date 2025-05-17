@@ -1,13 +1,13 @@
-package me.keraktelor.controllers.auth
+package controllers.auth
 
+import controllers.auth.handlers.handleLogin
+import controllers.auth.handlers.handleRefresh
+import controllers.auth.handlers.handleRegister
 import io.ktor.server.routing.*
-import me.keraktelor.controllers.auth.handlers.handleLogin
-import me.keraktelor.controllers.auth.handlers.handleRefresh
-import me.keraktelor.controllers.auth.handlers.handleRegister
-import me.keraktelor.services.auth.AuthService
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.ktor.ext.inject
+import services.auth.AuthService
 
 fun Module.authController() {
     singleOf(::AuthController)

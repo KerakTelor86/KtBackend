@@ -1,6 +1,6 @@
 package utilities
 
-import me.keraktelor.setup.Config
+import setup.Config
 
 fun getTestConfig(): Config = Config(
     postgres = Config.Postgres(

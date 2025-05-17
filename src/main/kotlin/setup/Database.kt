@@ -1,9 +1,9 @@
-package me.keraktelor.setup
+package setup
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import de.neonew.exposed.migrations.runMigrations
-import me.keraktelor.migrations.migrations
+import migrations.migrations
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.scope.Scope
 import org.koin.dsl.module

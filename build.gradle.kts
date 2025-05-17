@@ -4,9 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.plugin.serialization)
 }
 
-group = "me.keraktelor"
-version = "0.0.1"
-
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
 

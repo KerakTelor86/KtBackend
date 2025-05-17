@@ -1,15 +1,15 @@
 package controllers.auth
 
+import controllers.auth.handlers.LoginHandlerRequest
+import controllers.auth.handlers.LoginHandlerResponse
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.coEvery
 import io.mockk.coVerify
-import me.keraktelor.controllers.auth.handlers.LoginHandlerRequest
-import me.keraktelor.controllers.auth.handlers.LoginHandlerResponse
-import me.keraktelor.services.auth.AuthToken
-import me.keraktelor.services.auth.LoginServiceReq
-import me.keraktelor.services.auth.LoginServiceRes
+import services.auth.AuthToken
+import services.auth.LoginServiceReq
+import services.auth.LoginServiceRes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

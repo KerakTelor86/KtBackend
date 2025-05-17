@@ -1,7 +1,7 @@
-package me.keraktelor.services
+package services
 
-import me.keraktelor.services.auth.authService
 import org.koin.dsl.module
+import services.auth.authService
 
 val serviceModule = module {
     authService()

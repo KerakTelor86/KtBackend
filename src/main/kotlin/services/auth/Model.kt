@@ -1,4 +1,4 @@
-package me.keraktelor.services.auth
+package services.auth
 
 data class AuthToken(
     val access: String,

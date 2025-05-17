@@ -1,7 +1,7 @@
 ktor:
   application:
     modules:
-      - me.keraktelor.ApplicationKt.module
+      - ApplicationKt.module
   deployment:
     port: "$PORT:8080"
 postgres:

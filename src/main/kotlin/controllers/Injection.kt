@@ -1,6 +1,6 @@
-package me.keraktelor.controllers
+package controllers
 
-import me.keraktelor.controllers.auth.authController
+import controllers.auth.authController
 import org.koin.dsl.module
 
 val controllerModule = module(createdAtStart = true) {

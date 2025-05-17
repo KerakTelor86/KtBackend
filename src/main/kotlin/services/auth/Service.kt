@@ -1,9 +1,9 @@
-package me.keraktelor.services.auth
+package services.auth
 
-import me.keraktelor.repositories.auth.AuthRepository
-import me.keraktelor.repositories.auth.User
-import me.keraktelor.setup.Config
 import org.mindrot.jbcrypt.BCrypt
+import repositories.auth.AuthRepository
+import repositories.auth.User
+import setup.Config
 
 internal class AuthServiceImpl(
     config: Config,
