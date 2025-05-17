@@ -5,6 +5,7 @@ import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.and
 import utilities.exposed.suspendedTransaction
+import java.time.LocalDateTime
 import java.util.*
 
 class AuthRepositoryImpl(
@@ -22,6 +23,7 @@ class AuthRepositoryImpl(
             .new {
                 this.username = username
                 this.password = password
+                this.createdAt = LocalDateTime.now()
             }.toUser()
     }
 

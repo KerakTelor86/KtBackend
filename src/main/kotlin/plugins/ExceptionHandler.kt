@@ -1,9 +1,11 @@
 package plugins
 
 import io.ktor.http.*
+import io.ktor.serialization.*
 import io.ktor.server.application.*
 import io.ktor.server.application.hooks.*
-import io.ktor.server.request.*
+import io.ktor.server.plugins.*
+import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.response.*
 import io.ktor.util.logging.*
 import kotlinx.serialization.Serializable
@@ -13,11 +15,13 @@ private val logger = KtorSimpleLogger("setup.routing.exceptionHandler")
 val ExceptionHandler = createApplicationPlugin(name = "ExceptionHandler") {
     on(CallFailed) { call, err ->
         when (err) {
-            is ContentTransformationException -> {
-                val message = err.message ?: "Bad request"
+            is JsonConvertException,
+            is BadRequestException,
+            is ContentTransformationException,
+            -> {
                 call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("message" to message),
+                    mapOf("message" to "Bad request"),
                 )
             }
 

@@ -12,7 +12,12 @@ fun Application.setupRouting() {
     install(IgnoreTrailingSlash)
     install(ExceptionHandler)
     install(ContentNegotiation) {
-        json()
+        json(
+//            json = Json {
+//                isLenient = true
+//                ignoreUnknownKeys = true
+//            },
+        )
     }
     install(Compression)
     routing {

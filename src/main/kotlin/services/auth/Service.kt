@@ -130,7 +130,7 @@ internal class AuthServiceImpl(
     private val jwtRefreshDecoder = JWT
         .require(jwtAlgo)
         .withIssuer(jwtIssuer)
-        .withClaim(TOKEN_CLASS_KEY, TokenClass.Access.ordinal)
+        .withClaim(TOKEN_CLASS_KEY, TokenClass.Refresh.ordinal)
         .build()
 
     private companion object {

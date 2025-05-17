@@ -47,6 +47,9 @@ data class RegisterHandlerRequest(
             verify("Username length should be within 6-32 characters") {
                 username.length in 6..32
             },
+            verify("Username should only contain alphanumeric characters") {
+                username.all { it.isLetterOrDigit() }
+            },
             verify("Password length should be at least 6 characters") {
                 password.length >= 6
             },
