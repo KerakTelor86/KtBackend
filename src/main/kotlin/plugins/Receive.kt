@@ -63,6 +63,7 @@ internal inline fun <
         try {
             when (it.type) {
                 typeOf<String>() -> value
+                typeOf<Boolean>() -> value.toBoolean()
                 typeOf<Int>() -> value.toInt()
                 typeOf<Long>() -> value.toLong()
                 typeOf<Float>() -> value.toFloat()
