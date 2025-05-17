@@ -1,23 +1,25 @@
-package me.keraktelor
+package controllers
 
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import me.keraktelor.utils.testing.getTestConfig
-import me.keraktelor.utils.testing.getTestDatabase
+import me.keraktelor.module
 import org.koin.dsl.module
+import utilities.getTestConfig
+import utilities.getTestDatabase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ApplicationTest {
+class DefaultRoutesTest {
     @Test
     fun testRoot() = testApplication {
-        val testModule = module {
-            single { getTestConfig() }
-            single { getTestDatabase() }
-        }
         application {
-            module(testModule)
+            module(
+                module {
+                    single { getTestConfig() }
+                    single { getTestDatabase() }
+                },
+            )
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)

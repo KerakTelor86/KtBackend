@@ -1,4 +1,6 @@
-package me.keraktelor.utils.testing
+@file:Suppress("unused")
+
+package utilities
 
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

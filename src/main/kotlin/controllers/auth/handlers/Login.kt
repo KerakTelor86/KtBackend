@@ -1,39 +1,42 @@
 package me.keraktelor.controllers.auth.handlers
 
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import me.keraktelor.controllers.auth.AuthController
+import me.keraktelor.plugins.ok
+import me.keraktelor.plugins.receiveValidatedBody
+import me.keraktelor.plugins.unauthorized
 import me.keraktelor.services.auth.LoginServiceReq
 import me.keraktelor.services.auth.LoginServiceRes
-import me.keraktelor.utilities.dsl.Blank
-import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
-import me.keraktelor.utilities.dsl.Response.Builder.ok
-import me.keraktelor.utilities.dsl.Response.Builder.unauthorized
 
-fun AuthController.getLoginHandler() =
-    createHttpHandler { _: Blank, request: LoginHandlerRequest ->
-        val result = authService.login(
-            LoginServiceReq(
-                username = request.username,
-                password = request.password,
-            ),
-        )
+suspend fun AuthController.handleLogin(
+    context: RoutingContext,
+) = with(context) {
+    val request = call.receiveValidatedBody<LoginHandlerRequest>()
 
-        when (result) {
-            is LoginServiceRes.Ok -> ok {
-                LoginHandlerResponse.Ok(
-                    userId = result.userId,
-                    accessToken = result.tokens.access,
-                    refreshToken = result.tokens.refresh,
-                )
-            }
+    val result = authService.login(
+        LoginServiceReq(
+            username = request.username,
+            password = request.password,
+        ),
+    )
 
-            LoginServiceRes.Error.InvalidCredentials -> unauthorized {
-                LoginHandlerResponse.Error(
-                    message = "Invalid credentials",
-                )
-            }
+    when (result) {
+        is LoginServiceRes.Ok -> ok {
+            LoginHandlerResponse.Ok(
+                userId = result.userId,
+                accessToken = result.tokens.access,
+                refreshToken = result.tokens.refresh,
+            )
+        }
+
+        LoginServiceRes.Error.InvalidCredentials -> unauthorized {
+            LoginHandlerResponse.Error(
+                message = "Invalid credentials",
+            )
         }
     }
+}
 
 @Serializable
 data class LoginHandlerRequest(

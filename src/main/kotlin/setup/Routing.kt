@@ -1,32 +1,21 @@
 package me.keraktelor.setup
 
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
-import me.keraktelor.controllers.auth.authController
-import me.keraktelor.utilities.dsl.Blank
-import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
-import me.keraktelor.utilities.dsl.Response.Builder.ok
-import me.keraktelor.utilities.dsl.typedGet
-import java.time.OffsetDateTime
+import me.keraktelor.controllers.initializeRoutes
+import me.keraktelor.plugins.ExceptionHandler
 
 fun Application.setupRouting() {
     install(IgnoreTrailingSlash)
-
+    install(ExceptionHandler)
+    install(ContentNegotiation) {
+        json()
+    }
+    install(Compression)
     routing {
-        defaultRoutes()
-
-        authController()
+        initializeRoutes()
     }
-}
-
-fun Routing.defaultRoutes() {
-    val handler = createHttpHandler { _: Blank, _: Blank ->
-        ok {
-            mapOf(
-                "serverTime" to OffsetDateTime.now().toString(),
-            )
-        }
-    }
-
-    typedGet("/", handler)
 }

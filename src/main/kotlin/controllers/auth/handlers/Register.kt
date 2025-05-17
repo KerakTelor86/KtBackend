@@ -1,42 +1,41 @@
 package me.keraktelor.controllers.auth.handlers
 
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import me.keraktelor.controllers.auth.AuthController
+import me.keraktelor.plugins.*
+import me.keraktelor.plugins.ValidationRequirement.Builder.verify
 import me.keraktelor.services.auth.RegisterServiceReq
 import me.keraktelor.services.auth.RegisterServiceRes
-import me.keraktelor.utilities.dsl.Blank
-import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
-import me.keraktelor.utilities.dsl.Response.Builder.badRequest
-import me.keraktelor.utilities.dsl.Response.Builder.ok
-import me.keraktelor.utilities.validation.RequiresValidation
-import me.keraktelor.utilities.validation.ValidationRequirement
-import me.keraktelor.utilities.validation.ValidationRequirement.Builder.verify
 
-fun AuthController.getRegisterHandler() =
-    createHttpHandler { _: Blank, request: RegisterHandlerRequest ->
-        val result = authService.register(
-            RegisterServiceReq(
-                username = request.username,
-                password = request.password,
-            ),
-        )
+suspend fun AuthController.handleRegister(
+    context: RoutingContext,
+) = with(context) {
+    val request = call.receiveValidatedBody<RegisterHandlerRequest>()
 
-        when (result) {
-            is RegisterServiceRes.Ok -> ok {
-                RegisterHandlerResponse.Ok(
-                    userId = result.userId,
-                    accessToken = result.tokens.access,
-                    refreshToken = result.tokens.refresh,
-                )
-            }
+    val result = authService.register(
+        RegisterServiceReq(
+            username = request.username,
+            password = request.password,
+        ),
+    )
 
-            is RegisterServiceRes.Error.DuplicateUser -> badRequest {
-                RegisterHandlerResponse.Error(
-                    message = "Username already exists",
-                )
-            }
+    when (result) {
+        is RegisterServiceRes.Ok -> ok {
+            RegisterHandlerResponse.Ok(
+                userId = result.userId,
+                accessToken = result.tokens.access,
+                refreshToken = result.tokens.refresh,
+            )
+        }
+
+        is RegisterServiceRes.Error.DuplicateUser -> badRequest {
+            RegisterHandlerResponse.Error(
+                message = "Username already exists",
+            )
         }
     }
+}
 
 @Serializable
 data class RegisterHandlerRequest(

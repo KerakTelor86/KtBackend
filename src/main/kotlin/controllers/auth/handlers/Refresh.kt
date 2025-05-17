@@ -1,27 +1,30 @@
 package me.keraktelor.controllers.auth.handlers
 
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import me.keraktelor.controllers.auth.AuthController
+import me.keraktelor.plugins.ok
+import me.keraktelor.plugins.receiveValidatedBody
 import me.keraktelor.services.auth.RefreshServiceReq
 import me.keraktelor.services.auth.RefreshServiceRes
-import me.keraktelor.utilities.dsl.Blank
-import me.keraktelor.utilities.dsl.Handler.Builder.createHttpHandler
-import me.keraktelor.utilities.dsl.Response.Builder.ok
 
-fun AuthController.getRefreshHandler() =
-    createHttpHandler { _: Blank, request: RefreshHandlerRequest ->
-        val result = authService.refresh(
-            RefreshServiceReq(refreshToken = request.refreshToken),
-        )
+suspend fun AuthController.handleRefresh(
+    context: RoutingContext,
+) = with(context) {
+    val request = call.receiveValidatedBody<RefreshHandlerRequest>()
 
-        when (result) {
-            is RefreshServiceRes.Ok -> ok {
-                RefreshHandlerResponse.Ok(
-                    accessToken = result.accessToken,
-                )
-            }
+    val result = authService.refresh(
+        RefreshServiceReq(refreshToken = request.refreshToken),
+    )
+
+    when (result) {
+        is RefreshServiceRes.Ok -> ok {
+            RefreshHandlerResponse.Ok(
+                accessToken = result.accessToken,
+            )
         }
     }
+}
 
 @Serializable
 data class RefreshHandlerRequest(

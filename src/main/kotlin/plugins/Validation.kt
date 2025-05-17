@@ -1,13 +1,20 @@
-package me.keraktelor.utilities.validation
+package me.keraktelor.plugins
+
+class RequestValidationException(
+    val reasons: List<String>,
+) : IllegalArgumentException() {
+    override val message: String
+        get() = "Request did not pass validation"
+}
 
 data class ValidationRequirement(
     val description: String,
-    val validate: () -> Boolean,
+    val validate: suspend () -> Boolean,
 ) {
     companion object Builder {
         fun verify(
             description: String,
-            body: () -> Boolean,
+            body: suspend () -> Boolean,
         ): ValidationRequirement =
             ValidationRequirement(
                 description = description,
@@ -19,7 +26,7 @@ data class ValidationRequirement(
 interface RequiresValidation {
     val requirements: List<ValidationRequirement>
 
-    fun getFailedReasons(): List<String> =
+    private suspend fun getFailedReasons(): List<String> =
         requirements.mapNotNull { (description, validate) ->
             val isValid = validate()
             when (isValid) {
@@ -27,4 +34,11 @@ interface RequiresValidation {
                 false -> description
             }
         }
+
+    suspend fun validate() {
+        val failedReasons = getFailedReasons()
+        if (failedReasons.isNotEmpty()) {
+            throw RequestValidationException(reasons = failedReasons)
+        }
+    }
 }

@@ -1,11 +1,10 @@
 package me.keraktelor.controllers.auth
 
 import io.ktor.server.routing.*
-import me.keraktelor.controllers.auth.handlers.getLoginHandler
-import me.keraktelor.controllers.auth.handlers.getRefreshHandler
-import me.keraktelor.controllers.auth.handlers.getRegisterHandler
+import me.keraktelor.controllers.auth.handlers.handleLogin
+import me.keraktelor.controllers.auth.handlers.handleRefresh
+import me.keraktelor.controllers.auth.handlers.handleRegister
 import me.keraktelor.services.auth.AuthService
-import me.keraktelor.utilities.dsl.typedPost
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.ktor.ext.inject
@@ -18,9 +17,9 @@ fun Routing.authController() {
     val controller by inject<AuthController>()
 
     route("/auth") {
-        typedPost("/register", controller.getRegisterHandler())
-        typedPost("/refresh", controller.getRefreshHandler())
-        typedPost("/login", controller.getLoginHandler())
+        post("/register") { controller.handleRegister(this) }
+        post("/refresh") { controller.handleRefresh(this) }
+        post("/login") { controller.handleLogin(this) }
     }
 }
 

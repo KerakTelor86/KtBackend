@@ -1,27 +1,32 @@
-package me.keraktelor.controllers.auth
+package controllers.auth
 
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import me.keraktelor.controllers.auth.handlers.LoginHandlerRequest
 import me.keraktelor.controllers.auth.handlers.LoginHandlerResponse
-import me.keraktelor.controllers.auth.handlers.getLoginHandler
+import me.keraktelor.module
 import me.keraktelor.services.auth.AuthService
 import me.keraktelor.services.auth.AuthToken
 import me.keraktelor.services.auth.LoginServiceReq
 import me.keraktelor.services.auth.LoginServiceRes
-import me.keraktelor.utilities.dsl.Blank
-import me.keraktelor.utilities.dsl.Request
-import me.keraktelor.utilities.dsl.Response
-import me.keraktelor.utils.testing.buildTestModule
+import org.koin.dsl.module
+import utilities.getTestConfig
+import utilities.getTestDatabase
 import kotlin.test.Test
 
 class LoginTest {
     @Test
-    fun testSuccessfulLogin() = loginTest { controller, service ->
-        val handler = controller.getLoginHandler()
-
+    fun testSuccessfulLogin() = loginTest { client, service ->
         val serviceReq = LoginServiceReq(
             username = "user",
             password = "password",
@@ -35,78 +40,86 @@ class LoginTest {
         )
         coEvery { service.login(serviceReq) }.returns(serviceRes)
 
-        val result = handler(
-            Request(
-                pathParams = Blank(),
-                data = LoginHandlerRequest(
+        val response = client.post(ROUTE) {
+            setBody(
+                LoginHandlerRequest(
                     username = "user",
                     password = "password",
                 ),
-            ),
-        )
+            )
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(
-            Response(
-                statusCode = HttpStatusCode.OK,
-                data = LoginHandlerResponse.Ok(
-                    userId = "id",
-                    accessToken = "access",
-                    refreshToken = "refresh",
-                ),
+            LoginHandlerResponse.Ok(
+                userId = "id",
+                accessToken = "access",
+                refreshToken = "refresh",
             ),
-            result,
+            response.body<LoginHandlerResponse.Ok>(),
         )
 
         coVerify(exactly = 1) { service.login(serviceReq) }
     }
 
     @Test
-    fun testInvalidCredentials() = loginTest { controller, service ->
-        val handler = controller.getLoginHandler()
-
+    fun testInvalidCredentials() = loginTest { client, service ->
         val serviceReq = LoginServiceReq(
             username = "user",
             password = "password",
         )
         val serviceRes = LoginServiceRes.Error.InvalidCredentials
-
         coEvery { service.login(serviceReq) }.returns(serviceRes)
 
-        val result = handler(
-            Request(
-                pathParams = Blank(),
-                data = LoginHandlerRequest(
+        val result = client.post(ROUTE) {
+            setBody(
+                LoginHandlerRequest(
                     username = "user",
                     password = "password",
                 ),
-            ),
-        )
+            )
+        }
+        assertEquals(HttpStatusCode.Unauthorized, result.status)
         assertEquals(
-            Response(
-                statusCode = HttpStatusCode.Unauthorized,
-                data = LoginHandlerResponse.Error(
-                    message = "Invalid credentials",
-                ),
+            LoginHandlerResponse.Error(
+                message = "Invalid credentials",
             ),
-            result,
+            result.body<LoginHandlerResponse.Error>(),
         )
 
         coVerify(exactly = 1) { service.login(serviceReq) }
     }
 
-    private fun loginTest(
-        body: suspend (
-            controller: AuthController,
-            service: AuthService,
-        ) -> Unit,
-    ) = buildTestModule {
-        module {
-            authController()
-        }
-        mock<AuthService>()
-        execute {
-            val controller by inject<AuthController>()
-            val service by inject<AuthService>()
-            body(controller, service)
+    private companion object {
+        const val ROUTE = "/auth/login"
+
+        fun loginTest(
+            body: suspend (
+                client: HttpClient,
+                service: AuthService,
+            ) -> Unit,
+        ) = testApplication {
+            val service = mockk<AuthService>()
+
+            application {
+                module(
+                    module {
+                        single { getTestConfig() }
+                        single { getTestDatabase() }
+                        single { service }
+                    },
+                )
+            }
+
+            val client = client.config {
+                install(ContentNegotiation) {
+                    json()
+                }
+                defaultRequest {
+                    contentType(ContentType.Application.Json)
+                }
+            }
+
+            body(client, service)
         }
     }
 }

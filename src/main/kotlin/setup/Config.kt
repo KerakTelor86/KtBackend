@@ -102,11 +102,13 @@ private fun Scope.readConfig(): Config {
 
 private fun ApplicationConfigValue.toValue(type: KType): Any = when (type) {
     typeOf<String>() -> this.getString()
+    typeOf<Boolean>() -> this.getString().toBoolean()
     typeOf<Int>() -> this.getString().toInt()
     typeOf<Long>() -> this.getString().toLong()
     typeOf<Float>() -> this.getString().toFloat()
     typeOf<Double>() -> this.getString().toDouble()
     typeOf<List<String>>() -> this.getList()
+    typeOf<List<Boolean>>() -> this.getList().map(String::toBoolean)
     typeOf<List<Int>>() -> this.getList().map(String::toInt)
     typeOf<List<Long>>() -> this.getList().map(String::toInt)
     typeOf<List<Float>>() -> this.getList().map(String::toFloat)

@@ -1,4 +1,4 @@
-package me.keraktelor.utils.testing
+package utilities
 
 import me.keraktelor.setup.Config
 
