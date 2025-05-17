@@ -4,7 +4,7 @@ import controllers.auth.AuthController
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import plugins.*
-import plugins.ValidationRequirement.Builder.verify
+import plugins.ValidationRequirement.Builder.validate
 import services.auth.RegisterServiceReq
 import services.auth.RegisterServiceRes
 
@@ -44,13 +44,13 @@ data class RegisterHandlerRequest(
 ) : RequiresValidation {
     override val requirements: List<ValidationRequirement>
         get() = listOf(
-            verify("Username length should be within 6-32 characters") {
+            validate("Username length should be within 6-32 characters") {
                 username.length in 6..32
             },
-            verify("Username should only contain alphanumeric characters") {
+            validate("Username should only contain alphanumeric characters") {
                 username.all { it.isLetterOrDigit() }
             },
-            verify("Password length should be at least 6 characters") {
+            validate("Password length should be at least 6 characters") {
                 password.length >= 6
             },
         )

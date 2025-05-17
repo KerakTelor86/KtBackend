@@ -12,7 +12,7 @@ data class ValidationRequirement(
     val validate: suspend () -> Boolean,
 ) {
     companion object Builder {
-        fun verify(
+        fun validate(
             description: String,
             body: suspend () -> Boolean,
         ): ValidationRequirement =
