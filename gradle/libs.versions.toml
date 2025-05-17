@@ -12,6 +12,7 @@ exposed-migrations-version = "3.7.0"
 kotlinlogging-version = "7.0.7"
 jbcrypt-version = "0.4"
 mockk-version = "1.14.2"
+java-jwt-version = "4.5.0"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor3", version.ref = "koin-version" }
@@ -38,6 +39,7 @@ hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari-version" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlinlogging-version" }
 jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt-version" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk-version" }
+java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

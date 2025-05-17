@@ -15,3 +15,9 @@ postgres:
 crypto:
   bcrypt:
     rounds: "$BCRYPT_ROUNDS:12"
+  jwt:
+    secret: "$JWT_SECRET:verySecret123!"
+    issuer: "$JWT_ISSUER:backend-iss"
+    expirySeconds:
+      access: "$JWT_ACCESS_EXP:300"
+      refresh: "$JWT_REFRESH_EXP:86400"

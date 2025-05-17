@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.hikari.cp)
     implementation(libs.kotlin.logging)
     implementation(libs.jbcrypt)
+    implementation(libs.java.jwt)
     testImplementation(libs.ktor.client.content.negotiation)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)

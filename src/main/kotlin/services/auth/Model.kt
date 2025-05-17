@@ -45,4 +45,26 @@ sealed class RefreshServiceRes {
     data class Ok(
         val accessToken: String,
     ) : RefreshServiceRes()
+
+    sealed class Error : RefreshServiceRes() {
+        data object RefreshTokenExpired : Error()
+
+        data object RefreshTokenInvalid : Error()
+    }
+}
+
+data class DecodeTokenServiceReq(
+    val accessToken: String,
+)
+
+sealed class DecodeTokenServiceRes {
+    data class Ok(
+        val userId: String,
+    ) : DecodeTokenServiceRes()
+
+    sealed class Error : DecodeTokenServiceRes() {
+        data object AccessTokenExpired : Error()
+
+        data object AccessTokenInvalid : Error()
+    }
 }

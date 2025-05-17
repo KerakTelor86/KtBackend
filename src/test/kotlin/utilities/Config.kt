@@ -18,5 +18,13 @@ fun getTestConfig(): Config = Config(
         bcrypt = Config.Crypto.BCrypt(
             rounds = 10,
         ),
+        jwt = Config.Crypto.Jwt(
+            secret = "testSecret123!",
+            issuer = "test_iss",
+            expirySeconds = Config.Crypto.Jwt.Expiry(
+                access = 30,
+                refresh = 150,
+            ),
+        ),
     ),
 )

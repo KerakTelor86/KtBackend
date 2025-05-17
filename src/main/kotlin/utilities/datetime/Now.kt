@@ -1,10 +1,9 @@
 package utilities.datetime
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 
 fun localDateTimeNow(): LocalDateTime = Clock.System.now().toLocalDateTime(
     TimeZone.currentSystemDefault(),
 )
+
+fun instantNow(): Instant = Clock.System.now()

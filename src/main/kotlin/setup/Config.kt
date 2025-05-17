@@ -37,10 +37,22 @@ data class Config(
 
     data class Crypto(
         val bcrypt: BCrypt,
+        val jwt: Jwt,
     ) {
         data class BCrypt(
             val rounds: Int,
         )
+
+        data class Jwt(
+            val secret: String,
+            val issuer: String,
+            val expirySeconds: Expiry,
+        ) {
+            data class Expiry(
+                val access: Int,
+                val refresh: Int,
+            )
+        }
     }
 }
 

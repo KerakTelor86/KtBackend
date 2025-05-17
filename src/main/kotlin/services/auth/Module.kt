@@ -16,4 +16,6 @@ interface AuthService {
     suspend fun login(request: LoginServiceReq): LoginServiceRes
 
     suspend fun refresh(request: RefreshServiceReq): RefreshServiceRes
+
+    suspend fun decode(request: DecodeTokenServiceReq): DecodeTokenServiceRes
 }
