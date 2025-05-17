@@ -21,7 +21,7 @@ suspend fun AuthController.handleRegister(
     )
 
     when (result) {
-        is RegisterServiceRes.Ok -> ok {
+        is RegisterServiceRes.Ok -> created {
             RegisterHandlerResponse.Ok(
                 userId = result.userId,
                 accessToken = result.tokens.access,
@@ -29,7 +29,7 @@ suspend fun AuthController.handleRegister(
             )
         }
 
-        is RegisterServiceRes.Error.DuplicateUser -> badRequest {
+        is RegisterServiceRes.Error.DuplicateUser -> conflict {
             RegisterHandlerResponse.Error(
                 message = "Username already exists",
             )

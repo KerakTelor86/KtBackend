@@ -43,7 +43,7 @@ val ExceptionHandler = createApplicationPlugin(name = "ExceptionHandler") {
 }
 
 @Serializable
-private data class RequestValidationExceptionResponse(
+data class RequestValidationExceptionResponse(
     val message: String,
     val reasons: List<String>,
 )
