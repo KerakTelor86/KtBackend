@@ -11,6 +11,6 @@ fun main(args: Array<String>) {
 fun Application.module(
     vararg overrideModules: Module = emptyArray(),
 ) {
-    setupRouting()
     setupInjection(overrideModules)
+    setupRouting()
 }
