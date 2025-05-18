@@ -19,6 +19,12 @@ internal class AuthServiceImpl(
 ) : AuthService {
     private val bcryptRounds = config.crypto.bcrypt.rounds
 
+    init {
+        require(bcryptRounds in 10..15) {
+            "BCrypt rounds must be between 10 and 15"
+        }
+    }
+
     private val jwtIssuer =
         config.crypto.jwt.issuer
     private val jwtAccessValidity =
@@ -63,7 +69,9 @@ internal class AuthServiceImpl(
         }
 
         val currentTime = instantNow()
-        if (currentTime > decoded.expiresAtAsInstant.toKotlinInstant()) {
+        val expiresAt = decoded.expiresAtAsInstant?.toKotlinInstant()
+            ?: Instant.DISTANT_PAST
+        if (currentTime > expiresAt) {
             return RefreshServiceRes.Error.RefreshTokenExpired
         }
 
@@ -85,7 +93,9 @@ internal class AuthServiceImpl(
         }
 
         val currentTime = instantNow()
-        if (currentTime > decoded.expiresAtAsInstant.toKotlinInstant()) {
+        val expiresAt = decoded.expiresAtAsInstant?.toKotlinInstant()
+            ?: Instant.DISTANT_PAST
+        if (currentTime > expiresAt) {
             return DecodeTokenServiceRes.Error.AccessTokenExpired
         }
 
@@ -116,7 +126,7 @@ internal class AuthServiceImpl(
         .create()
         .withIssuer(jwtIssuer)
         .withSubject(subject)
-        .withClaim(TOKEN_CLASS_KEY, this.ordinal)
+        .withClaim(TOKEN_CLASS_KEY, this.name)
         .withExpiresAt(validUntil.toJavaInstant())
         .withIssuedAt(instantNow().toJavaInstant())
         .sign(jwtAlgo)
@@ -125,12 +135,12 @@ internal class AuthServiceImpl(
     private val jwtAccessDecoder = JWT
         .require(jwtAlgo)
         .withIssuer(jwtIssuer)
-        .withClaim(TOKEN_CLASS_KEY, TokenClass.Access.ordinal)
+        .withClaim(TOKEN_CLASS_KEY, TokenClass.Access.name)
         .build()
     private val jwtRefreshDecoder = JWT
         .require(jwtAlgo)
         .withIssuer(jwtIssuer)
-        .withClaim(TOKEN_CLASS_KEY, TokenClass.Refresh.ordinal)
+        .withClaim(TOKEN_CLASS_KEY, TokenClass.Refresh.name)
         .build()
 
     private companion object {

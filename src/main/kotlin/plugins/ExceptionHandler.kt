@@ -35,6 +35,16 @@ val ExceptionHandler = createApplicationPlugin(name = "ExceptionHandler") {
                 )
             }
 
+            is UnauthorizedException -> {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    mapOf(
+                        "message" to "Unauthorized",
+                        "reason" to err.message,
+                    ),
+                )
+            }
+
             else -> {
                 call.respond(
                     HttpStatusCode.InternalServerError,

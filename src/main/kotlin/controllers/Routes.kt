@@ -1,6 +1,7 @@
 package controllers
 
 import controllers.auth.authController
+import controllers.test.testController
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorredoc.redoc
@@ -11,6 +12,7 @@ fun Routing.initializeRoutes() {
     defaultRoutes()
 
     authController()
+    testController()
 }
 
 fun Routing.defaultRoutes() {

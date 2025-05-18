@@ -19,9 +19,11 @@ fun RouteConfig.loginInfo() {
     }
     response {
         code(HttpStatusCode.OK) {
+            description = "OK"
             body<LoginHandlerResponse.Ok>()
         }
         code(HttpStatusCode.Unauthorized) {
+            description = "Invalid credentials"
             body<LoginHandlerResponse.Error>()
         }
     }
