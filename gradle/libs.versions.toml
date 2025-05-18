@@ -13,6 +13,8 @@ kotlinlogging-version = "7.0.7"
 jbcrypt-version = "0.4"
 mockk-version = "1.14.2"
 java-jwt-version = "4.5.0"
+ktor-openapi-version = "5.0.2"
+schema-kenerator-version = "2.1.2"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor3", version.ref = "koin-version" }
@@ -40,6 +42,11 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kot
 jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt-version" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk-version" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt-version" }
+ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "ktor-openapi-version" }
+ktor-redoc = { module = "io.github.smiley4:ktor-redoc", version.ref = "ktor-openapi-version" }
+schema-kenerator-core = { module = "io.github.smiley4:schema-kenerator-core", version.ref = "schema-kenerator-version" }
+schema-kenerator-serialization = { module = "io.github.smiley4:schema-kenerator-serialization", version.ref = "schema-kenerator-version" }
+schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerator-swagger", version.ref = "schema-kenerator-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

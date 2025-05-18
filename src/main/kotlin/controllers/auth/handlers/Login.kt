@@ -1,6 +1,8 @@
 package controllers.auth.handlers
 
 import controllers.auth.AuthController
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import plugins.ok
@@ -8,6 +10,22 @@ import plugins.receiveValidatedBody
 import plugins.unauthorized
 import services.auth.LoginServiceReq
 import services.auth.LoginServiceRes
+
+fun RouteConfig.loginInfo() {
+    description = "Login"
+    tags("auth")
+    request {
+        body<LoginHandlerRequest>()
+    }
+    response {
+        code(HttpStatusCode.OK) {
+            body<LoginHandlerResponse.Ok>()
+        }
+        code(HttpStatusCode.Unauthorized) {
+            body<LoginHandlerResponse.Error>()
+        }
+    }
+}
 
 suspend fun AuthController.handleLogin(
     context: RoutingContext,

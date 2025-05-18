@@ -1,9 +1,11 @@
 package controllers
 
 import controllers.auth.authController
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktorredoc.redoc
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import plugins.ok
-import java.time.OffsetDateTime
 
 fun Routing.initializeRoutes() {
     defaultRoutes()
@@ -12,11 +14,15 @@ fun Routing.initializeRoutes() {
 }
 
 fun Routing.defaultRoutes() {
-    get("/") {
-        ok {
-            mapOf(
-                "serverTime" to OffsetDateTime.now().toString(),
-            )
-        }
+    route("/api.json") {
+        openApi()
+    }
+    route("/redoc") {
+        redoc("/api.json")
+    }
+    get("/", {
+        hidden = true
+    }) {
+        call.respondRedirect("/redoc")
     }
 }

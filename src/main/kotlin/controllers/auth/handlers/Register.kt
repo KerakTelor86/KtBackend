@@ -1,12 +1,30 @@
 package controllers.auth.handlers
 
 import controllers.auth.AuthController
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import plugins.*
 import plugins.ValidationRequirement.Builder.validate
 import services.auth.RegisterServiceReq
 import services.auth.RegisterServiceRes
+
+fun RouteConfig.registerInfo() {
+    description = "Register"
+    tags("auth")
+    request {
+        body<RegisterHandlerRequest>()
+    }
+    response {
+        code(HttpStatusCode.Created) {
+            body<RegisterHandlerResponse.Ok>()
+        }
+        code(HttpStatusCode.Conflict) {
+            body<RegisterHandlerResponse.Error>()
+        }
+    }
+}
 
 suspend fun AuthController.handleRegister(
     context: RoutingContext,
