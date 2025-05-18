@@ -1,15 +1,13 @@
 package controllers.test
 
-import controllers.test.handlers.handleRequiresAuth
-import controllers.test.handlers.requiresAuthInfo
-import io.github.smiley4.ktoropenapi.config.RouteConfig
-import io.github.smiley4.ktoropenapi.get
+import controllers.test.handlers.buildRequiresAuthHandler
 import io.ktor.server.routing.*
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 import plugins.RequiresAuth
+import utilities.routing.documentRoutes
 
 fun Module.testController() {
     singleOf(::TestController)
@@ -23,10 +21,12 @@ fun Routing.testController() {
             authService = get()
         }
 
-        get("/needs-auth", RouteConfig::requiresAuthInfo) {
-            controller.handleRequiresAuth(this)
+        documentRoutes {
+            get("/needs-auth", controller.buildRequiresAuthHandler())
         }
     }
 }
 
-class TestController
+class TestController {
+    val testPrefix = "test"
+}
