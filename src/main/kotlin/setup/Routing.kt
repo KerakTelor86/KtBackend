@@ -9,13 +9,21 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.ClassDiscriminatorMode
+import kotlinx.serialization.json.Json
 import plugins.ExceptionHandler
 
+@OptIn(ExperimentalSerializationApi::class)
 fun Application.setupRouting() {
     install(IgnoreTrailingSlash)
     install(ExceptionHandler)
     install(ContentNegotiation) {
-        json()
+        json(
+            Json {
+                classDiscriminatorMode = ClassDiscriminatorMode.NONE
+            },
+        )
     }
     install(Compression)
     install(OpenApi) {

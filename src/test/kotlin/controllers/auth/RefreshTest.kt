@@ -60,7 +60,7 @@ class RefreshTest {
         assertEquals(HttpStatusCode.BadRequest, response.status)
         assertTrue {
             response
-                .body<RefreshHandlerResponse.Error>()
+                .body<RefreshHandlerResponse.ErrorInvalid>()
                 .message
                 .lowercase()
                 .contains("invalid")
@@ -87,7 +87,7 @@ class RefreshTest {
         assertEquals(HttpStatusCode.Unauthorized, response.status)
         assertTrue {
             response
-                .body<RefreshHandlerResponse.Error>()
+                .body<RefreshHandlerResponse.ErrorExpired>()
                 .message
                 .lowercase()
                 .contains("expired")

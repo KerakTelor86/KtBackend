@@ -1,5 +1,7 @@
 package plugins
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 class RequestValidationException(
     val reasons: List<String>,
 ) : IllegalArgumentException() {
@@ -24,6 +26,7 @@ data class ValidationRequirement(
 }
 
 interface RequiresValidation {
+    @get:JsonIgnore
     val requirements: List<ValidationRequirement>
 
     private suspend fun getFailedReasons(): List<String> =

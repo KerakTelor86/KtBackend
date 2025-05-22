@@ -1,59 +1,43 @@
 package controllers.auth.handlers
 
 import controllers.auth.AuthController
-import io.github.smiley4.ktoropenapi.config.RouteConfig
-import io.ktor.http.*
-import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import plugins.*
+import plugins.RequiresValidation
+import plugins.ValidationRequirement
 import plugins.ValidationRequirement.Builder.validate
 import services.auth.RegisterServiceReq
 import services.auth.RegisterServiceRes
+import utilities.routing.StatusCode
+import utilities.routing.buildHandler
 
-fun RouteConfig.registerInfo() {
-    description = "Register"
-    tags("auth")
-    request {
-        body<RegisterHandlerRequest>()
-    }
-    response {
-        code(HttpStatusCode.Created) {
-            body<RegisterHandlerResponse.Ok>()
-        }
-        code(HttpStatusCode.Conflict) {
-            body<RegisterHandlerResponse.Error>()
-        }
-    }
-}
+fun AuthController.buildRegisterHandler() = buildHandler
+    .withBody<RegisterHandlerRequest>()
+    .handle { params ->
+        val request = params.body
 
-suspend fun AuthController.handleRegister(
-    context: RoutingContext,
-) = with(context) {
-    val request = call.receiveValidatedBody<RegisterHandlerRequest>()
+        val result = authService.register(
+            RegisterServiceReq(
+                username = request.username,
+                password = request.password,
+            ),
+        )
 
-    val result = authService.register(
-        RegisterServiceReq(
-            username = request.username,
-            password = request.password,
-        ),
-    )
+        when (result) {
+            is RegisterServiceRes.Ok -> {
+                RegisterHandlerResponse.Ok(
+                    userId = result.userId,
+                    accessToken = result.tokens.access,
+                    refreshToken = result.tokens.refresh,
+                )
+            }
 
-    when (result) {
-        is RegisterServiceRes.Ok -> created {
-            RegisterHandlerResponse.Ok(
-                userId = result.userId,
-                accessToken = result.tokens.access,
-                refreshToken = result.tokens.refresh,
-            )
-        }
-
-        is RegisterServiceRes.Error.DuplicateUser -> conflict {
-            RegisterHandlerResponse.Error(
-                message = "Username already exists",
-            )
+            is RegisterServiceRes.Error.DuplicateUser -> {
+                RegisterHandlerResponse.Error(
+                    message = "Username already exists",
+                )
+            }
         }
     }
-}
 
 @Serializable
 data class RegisterHandlerRequest(
@@ -77,6 +61,7 @@ data class RegisterHandlerRequest(
 @Serializable
 sealed class RegisterHandlerResponse {
     @Serializable
+    @StatusCode.Created
     data class Ok(
         val userId: String,
         val accessToken: String,
@@ -84,6 +69,7 @@ sealed class RegisterHandlerResponse {
     ) : RegisterHandlerResponse()
 
     @Serializable
+    @StatusCode.Conflict
     data class Error(
         val message: String,
     ) : RegisterHandlerResponse()

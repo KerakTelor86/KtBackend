@@ -1,65 +1,41 @@
 package controllers.auth.handlers
 
 import controllers.auth.AuthController
-import io.github.smiley4.ktoropenapi.config.RouteConfig
-import io.ktor.http.*
-import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import plugins.badRequest
-import plugins.ok
-import plugins.receiveValidatedBody
-import plugins.unauthorized
 import services.auth.RefreshServiceReq
 import services.auth.RefreshServiceRes
+import utilities.routing.StatusCode
+import utilities.routing.buildHandler
 
-fun RouteConfig.refreshInfo() {
-    description = "Refresh"
-    tags("auth")
-    request {
-        body<RefreshHandlerRequest>()
-    }
-    response {
-        code(HttpStatusCode.OK) {
-            body<RefreshHandlerResponse.Ok>()
-        }
-        code(HttpStatusCode.BadRequest) {
-            body<RefreshHandlerResponse.Error>()
-        }
-        code(HttpStatusCode.Unauthorized) {
-            body<RefreshHandlerResponse.Error>()
-        }
-    }
-}
+fun AuthController.buildRefreshHandler() = buildHandler
+    .withBody<RefreshHandlerRequest>()
+    .handle { params ->
+        val request = params.body
 
-suspend fun AuthController.handleRefresh(
-    context: RoutingContext,
-) = with(context) {
-    val request = call.receiveValidatedBody<RefreshHandlerRequest>()
+        val result = authService.refresh(
+            RefreshServiceReq(refreshToken = request.refreshToken),
+        )
 
-    val result = authService.refresh(
-        RefreshServiceReq(refreshToken = request.refreshToken),
-    )
+        when (result) {
+            is RefreshServiceRes.Ok -> {
+                RefreshHandlerResponse.Ok(
+                    accessToken = result.accessToken,
+                )
+            }
 
-    when (result) {
-        is RefreshServiceRes.Ok -> ok {
-            RefreshHandlerResponse.Ok(
-                accessToken = result.accessToken,
-            )
-        }
+            RefreshServiceRes.Error.RefreshTokenInvalid -> {
+                RefreshHandlerResponse.ErrorInvalid(
+                    message = "Invalid refresh token",
+                )
+            }
 
-        RefreshServiceRes.Error.RefreshTokenInvalid -> badRequest {
-            RefreshHandlerResponse.Error(
-                message = "Invalid refresh token",
-            )
-        }
-
-        RefreshServiceRes.Error.RefreshTokenExpired -> unauthorized {
-            RefreshHandlerResponse.Error(
-                message = "Refresh token expired",
-            )
+            RefreshServiceRes.Error.RefreshTokenExpired -> {
+                RefreshHandlerResponse.ErrorExpired(
+                    message = "Refresh token expired",
+                )
+            }
         }
     }
-}
 
 @Serializable
 data class RefreshHandlerRequest(
@@ -69,12 +45,20 @@ data class RefreshHandlerRequest(
 @Serializable
 sealed class RefreshHandlerResponse {
     @Serializable
+    @StatusCode.Ok
     data class Ok(
         val accessToken: String,
     ) : RefreshHandlerResponse()
 
     @Serializable
-    data class Error(
+    @StatusCode.BadRequest
+    data class ErrorInvalid(
+        val message: String,
+    ) : RefreshHandlerResponse()
+
+    @Serializable
+    @StatusCode.Unauthorized
+    data class ErrorExpired(
         val message: String,
     ) : RefreshHandlerResponse()
 }
